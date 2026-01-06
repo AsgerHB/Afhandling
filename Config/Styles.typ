@@ -50,7 +50,7 @@
   let myNumbering(..numbers) = {
     let len = numbers.pos().len()
     if (len == 1) {
-      return align(center)[Paper #numbering("A", ..numbers) #h(-0em) \ ]
+      return [Paper #numbering("A", ..numbers): \ \ ]
     } 
     if (len <= 3) {
       return numbering("1.1", ..numbers.pos().slice(1))
@@ -79,8 +79,16 @@
     set text(size: 10pt)
     it
   }
+
+  // Table of Contents
+  show outline.entry: it => {
+    show linebreak: none
+    it
+  }
+
+
+
   // Lemmify theorems
-  
   let (
     theorem, lemma, corollary,
     remark, proposition, example,
