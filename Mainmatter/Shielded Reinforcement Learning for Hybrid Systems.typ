@@ -532,7 +532,7 @@ $ mu arrow.r_()^a mu prime arrow.l.r.double exists s in mu dot.basic med exists 
   label: <fig:SquaresReachabilityGroup>,
   caption: [
     State-space partitioning for
-    Example #link(<ex:hitting>)[\[ex:hitting\]]. Starting in the blue
+    @ex:hitting. Starting in the blue
     region and depending on the action, the system can end up in the
     green regions within one time period, witnessed by simulations from
     $16$ initial states.
@@ -557,7 +557,7 @@ such that
 $ bb(S)_phi eq phi^A inter brace.l mu divides exists a dot.basic med forall mu prime dot.basic med mu arrow.r^a mu prime arrow.r.double.long mu prime in bb(S)_phi brace.r dot.basic $ <defeq>
 
 Given the finiteness of $A$ and monotonicity
-of #link(<defeq>)[\[defeq\]], $bb(S)_phi$ may be obtained in a finite
+of @defeq, $bb(S)_phi$ may be obtained in a finite
 number of interations using Tarski’s fixed-point
 theorem #cite(label("Tarski55")).
 
@@ -570,10 +570,11 @@ $ nu_phi lr((mu)) eq brace.l a divides forall mu prime dot.basic med mu arrow.r^
 The following theorem states that we can obtain a safety strategy for
 the original EMDP $M$ from a safety strategy $nu$ for $T_M^A$.
 
-<thm:safety_transfer> Given an EMDP $M$, safety property
-$phi subset.eq cal(S)$ and partitioning $A$, if $nu$ is a safety
-strategy for $T_M^A$, then $sigma lr((s)) eq nu lr((lr([s])_(cal(A))))$
-is a safety strategy for $M$.
+#theorem()[Given an EMDP $M$, safety property
+  $phi subset.eq cal(S)$ and partitioning $A$, if $nu$ is a safety
+  strategy for $T_M^A$, then $sigma lr((s)) eq nu lr((lr([s])_(cal(A))))$
+  is a safety strategy for $M$.
+]<thm:safety_transfer> 
 
 === Approximating the 2-player Game
 <approximating-the-2-player-game>
@@ -585,7 +586,7 @@ $M$ is derived from an HMDP
 $H M eq lr((cal(S) comma s_0 comma italic("Act") comma P comma N comma H comma C comma cal(G)))$,
 this requires decidability of the predicate
 $Delta_(H comma N lr((s comma a)))^P lr((s prime)) gt 0$. Consider the
-bouncing ball from Example #link(<ex:hitting>)[\[ex:hitting\]]. The
+bouncing ball from @ex:hitting. The
 regions are of the form
 $mu eq brace.l lr((p comma v)) divides l_p lt.eq p lt u_p and l_v lt.eq v lt u_v brace.r$.
 For given regions $mu comma mu prime$, the predicate
@@ -596,6 +597,20 @@ $p comma v$ and $t$):#footnote[We assume that at most one bounce can
 take place within the period $P$.]
 $ exists lr((p comma v)) in mu dot.basic med F lr((lr((p comma v)) comma P)) in mu prime or  & exists beta in lr([0.85 comma 0.97]) dot.basic med exists t prime lt.eq P dot.basic med exists v prime dot.basic\
  & F lr((lr((p comma v)) comma t prime)) eq lr((0 comma v prime)) and F lr((lr((0 comma minus beta dot.op v prime)) comma P minus t prime)) in mu prime $
+
+#figure(kind: "algorithm", supplement: [Algorithm], placement: bottom,
+  pseudocode-list(numbered-title: [Approximation of $->^a$], booktabs: true)[
+    - *Input:* $mu in cal(A), a in italic("Act")$
+    - *Output:* $mu ->^a_italic("app") mu' "iff" mu' in R$
+    + $R = emptyset$
+    + *for all* $s_i in italic("app")[mu]$ *do*
+      + select $s'_i ~ N(s_i, a)$
+      + simulate $cal(H)$ from $s'_i$ for $P$ time units
+      + let $s''_i$ be the resulting state
+      + add $[s''_i]_cal(A)$ to $R$
+    - *end for*
+  ]
+)<MCAlgo>
 
 For this simple example, the validity of the formula can be
 decided #cite(label("Tarski48")), which may however require doubly exponential
@@ -609,19 +624,6 @@ This motivates to use an efficient and robust alternative. We propose to
 approximate the transition relation using equally spaced samples, which
 are simulated according to the SHS $cal(H)$ underlying the given HMDP $cal("HM")$.
 
-#figure(kind: "algorithm", supplement: [Algorithm],
-  pseudocode-list(numbered-title: [Approximation of $->^a$], booktabs: true)[
-    - *Input:* $mu in cal(A), a in italic("Act")$
-    - *Output:* $mu ->^a_italic("app") mu' "iff" mu' in R$
-    + $R = emptyset$
-    + *for all* $s_i in italic("app")[mu]$ *do*
-      + select $s'_i ~ N(s_i, a)$
-      + simulate $cal(H)$ from $s'_i$ for $P$ time units
-      + let $s''_i$ be the resulting state
-      + add $[s''_i]_cal(A)$ to $R$
-    - *end for*
-  ]
-)<MCAlgo>
 
 @MCAlgo describes how to compute an
 approximation $mu arrow.r^a_(a p p) mu prime$ of
@@ -644,7 +646,7 @@ transition relation $arrow.r^a$ , with a corresponding transition system
 $hat(T)_M^A eq lr((cal(A) comma italic("Act") comma arrow.r^()_(a p p)))$.
 Thus if we compute a safety strategy $nu$ from $arrow.r^a_(a p p)$, then
 the strategy $sigma lr((s)) eq nu lr((lr([s])_(cal(A))))$ from
-Theorem #link(<thm:safety_transfer>)[\[thm:safety\_transfer\]] is not
+@thm:safety_transfer is not
 necessarily safe. However, in @sec:experiments we
 will see that this strategy is statistically safe in practice. We
 attribute this to two reasons. 1) The underapproximation of
@@ -668,6 +670,7 @@ unsafe actions chosen by the agent are corrected (which is possibly
 detrimental to the performance of the agent).
 
 #figure(stack(dir: ltr, image("../Graphics/AISOLA23/RWShield.svg", width: 50%), image("../Graphics/AISOLA23/BBShield.svg", width: 50%)),
+  placement: top,
   caption: [
     Synthesized nondeterministic strategies for \
     random walk (left) and bouncing ball
@@ -676,7 +679,7 @@ detrimental to the performance of the agent).
 ) <fig:ShieldsRWBB>
 
 @fig:ShieldsRWBB shows examples of such strategies for
-the random walk (Example #link(<ex:random_walk>)[\[ex:random\_walk\]])
+the random walk (@ex:random_walk)
 and the bouncing ball. As can be seen, most regions of the state space
 are either unsafe (black) or both actions are safe (white). Only in a
 small area (purple) will the strategy enforce walking fast or hitting
@@ -684,6 +687,7 @@ the ball, respectively. In the white area, the agent can learn the
 action that leads to the highest performance.
 
 #figure([#image("../Graphics/AISOLA23/StrategoMyPreShielding.svg", width: 100%)],
+  placement: bottom,
   caption: [
     Complete method for pre-shielding and statistical model checking
     (SMC).
@@ -709,8 +713,8 @@ deterministic strategy $sigma^ast.basic$.
 <sec:experiments>
 In this section we study our proposed approach with regard to different
 aspects of our shields. In addition to the random walk
-(Example #link(<ex:random_walk>)[\[ex:random\_walk\]]) and bouncing ball
-(Example #link(<ex:hitting>)[\[ex:hitting\]]), we consider three
+(@ex:random_walk) and bouncing ball
+(@ex:hitting), we consider three
 benchmark cases:
 
 - #emph[Cruise
@@ -764,8 +768,7 @@ benchmark cases:
   columns: 2,
   label: <fig:Shields>,
   caption: [
-    Projected views of synthesized most permissive \ 
-    safety strategies.
+    Projected views of synthesized most permissive safety strategies.
   ]
 )
 
@@ -852,8 +855,7 @@ learned to act safely most of the time and thus not challenge the shield
 as much.) If no safety violation was detected, we compute 99% confidence
 intervals for the statistical safety.
 
-<tab:BBSynthesis>
-#align(center)[
+#figure([
   #let c(n, content) = table.cell(content, align: horizon, rowspan: n)
   #table(
     columns: 5,
@@ -875,22 +877,23 @@ intervals for the statistical safety.
     table.hline(),
     [0.01],   c(2)[#smallcaps[JuliaReach]],   [time step $0.002$],   [24h 30m],   [considers $s_0$ unsafe],
     [0.01],                                   [time step $0.001$],   [41h 05m],   [safe by construction],
-)
-#align(center, [ Synthesis results for the bouncing ball under varying
-granularity ($gamma$) and supporting points ($n$) using
-@MCAlgo (top) and two choices of the
-time-step parameter using #smallcaps[JuliaReach] (bottom). The safety
-probability is computed for a 99% confidence interval. $gamma eq 0.02$
-corresponds to $9.0 dot.op 10^5$ partitions, and $gamma eq 0.01$
-quadruples the number of partitions to $3.6 dot.op 10^6$. ])
-]
+  )],
+  caption: [ Synthesis results for the bouncing ball under varying
+    granularity ($gamma$) and supporting points ($n$) using
+    @MCAlgo (top) and two choices of the
+    time-step parameter using #smallcaps[JuliaReach] (bottom). The safety
+    probability is computed for a 99% confidence interval. $gamma eq 0.02$
+    corresponds to $9.0 dot.op 10^5$ partitions, and $gamma eq 0.01$
+    quadruples the number of partitions to $3.6 dot.op 10^6$. ]
+)<tab:BBSynthesis>
+
 
 We consider again the bouncing-ball model. #smallcaps[JuliaReach]
 requires a low partition granularity $gamma eq 0.01$; for
 $gamma eq 0.02$ it cannot prove that a safety strategy exists, which may
 be due to conservatism, while our method is able to synthesize a shield
 that, for $n gt.eq 4$, is statistically safe.
-Table #link(<tab:BBSynthesis>)[1] shows the results obtained from the
+@tab:BBSynthesis shows the results obtained from the
 two approaches. In addition, the reachability algorithm uses time
 discretization, and a small time step is required to find a safety
 strategy.
@@ -956,7 +959,7 @@ regions of the state space. This also leads to faster convergence.
 )
 
 Tables #ref(<tab:CCSynthesis>, supplement: none)---#ref(<tab:DCSynthesis>, supplement: none) report the same data as
-in Table #link(<tab:BBSynthesis>)[1] for the other models. Overall, we
+in @tab:BBSynthesis for the other models. Overall, we
 see a similar trend in all tables. For a low number of supporting points
 (say, $n eq 3$) we can obtain a safety strategy that we find to be
 statistically safe. In all cases, no unsafe run was detected in the
@@ -1125,8 +1128,8 @@ third option is a pre-shielded agent. In all cases, training and
 evaluation is repeated 10 times, and the mean value is reported. The
 evaluation is based on 1000 traces for each repetition.
 
-Figures #link(<fig:RWShieldingResultsGroup>)[19],
-to #link(<fig:OPShieldingResultsGroup>)[39] report the results for the
+Figures #ref(<fig:RWShieldingResultsGroup>, supplement: none),
+to #ref(<fig:OPShieldingResultsGroup>, supplement: none) report the results for the
 different models. Each subfigure shows the following content: (a) shows
 the average cost of the final agent, (b) shows the amount of safety
 violations of the unshielded agents and (c) shows the number of times
@@ -1143,26 +1146,25 @@ the post-shielded agents may be based on a learned unsafe strategy that
 contradicts the shield, and thus the shield interference can be more
 detrimental.
 
-<tab:CCPostShieldComparison>
-#align(center)[#table(
-  columns: (3fr, 1fr, 1fr, 1fr, 1fr),
-  align: (col, row) => (left,center,center,center,center,).at(col),
-  inset: 6pt,
-  table.header([#strong[Configuration]], [#strong[Cost]], table.cell(colspan: 3)[#strong[Interventions]]),
-  [Baseline with uniform \ random choice],  [11371],  table.cell(colspan: 3)[13.50],
-  table.hline(),
-  [Minimizing interventions],  [11791],  [($plus 3.7 percent$)],  [11.43],  [($minus 15.3 percent$)],
-  [Minimizing cost],  [10768],  [($minus 5.3 percent$)],  [17.43],  [($plus 29.1 percent$)],
-  [Agent preference],  [11493],  [($minus 1.1 percent$)],  [14.55],  [($plus 7.8 percent$)],
-  [Pre-shielded agent],  [6912],  [($minus 39.2 percent$)],  [–],  [–],
-)
-#align(center, [Change of post-optimization relative to the
+#figure(table(
+    columns: (3fr, 1fr, 1fr, 1fr, 1fr),
+    align: (col, row) => (left,center,center,center,center,).at(col),
+    inset: 6pt,
+    table.header([#strong[Configuration]], [#strong[Cost]], table.cell(colspan: 3)[#strong[Interventions]]),
+    [Baseline with uniform \ random choice],  [11371],  table.cell(colspan: 3)[13.50],
+    table.hline(),
+    [Minimizing interventions],  [11791],  [($plus 3.7 percent$)],  [11.43],  [($minus 15.3 percent$)],
+    [Minimizing cost],  [10768],  [($minus 5.3 percent$)],  [17.43],  [($plus 29.1 percent$)],
+    [Agent preference],  [11493],  [($minus 1.1 percent$)],  [14.55],  [($plus 7.8 percent$)],
+    [Pre-shielded agent],  [6912],  [($minus 39.2 percent$)],  [–],  [–],
+  ),
+  caption: [Change of post-optimization relative to the
 uniform-choice strategy. The strategy was trained for $12 comma 000$
 episodes with $d eq 10$ and post-optimized for $4 comma 000$ episodes.
 Performance of the pre-shielded agent is included for comparison, but
 interventions are not applicable (because the shield was in place during
-training).])
-]
+training).]
+)<tab:CCPostShieldComparison>
 
 === Post-Shielding Optimization
 <post-shielding-optimization>
@@ -1174,7 +1176,7 @@ three ways to resolve nondeterminism:
 2) minimizing cost and
 3) at the preference of the shielded agent (the so-called Q-value #cite(label("Watkins89"))).
 
-Table #link(<tab:CCPostShieldComparison>)[5] shows the effect of
+@tab:CCPostShieldComparison shows the effect of
 post-optimization on the cost and the number of interventions for the
 cruise-control example. Notably, cost is only marginally affected, but
 the number of shield interventions can get significantly higher. The

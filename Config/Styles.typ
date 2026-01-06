@@ -86,7 +86,8 @@
     it
   }
 
-
+  // Equations
+  set math.equation(numbering: "1.")
 
   // Lemmify theorems
   let (
