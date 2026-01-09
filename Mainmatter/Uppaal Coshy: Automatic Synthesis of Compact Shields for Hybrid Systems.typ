@@ -8,9 +8,7 @@
   proof, definition, rules: thm-rules
 ) = default-theorems("thm-group", lang: "en", thm-numbering: thm-numbering-linear)
 
-#let convertme(content) = { set text(fill: red); content}
-
-= Uppaal Coshy: Automatic Synthesis of Compact Shields for Hybrid Systems
+= #smallcaps[Uppaal Coshy]: Automatic Synthesis of Compact Shields for Hybrid Systems
 
 #grid(columns: (1fr, 1fr), row-gutter: 2em,
   [Asger Horn Brorholt \
@@ -40,7 +38,7 @@
 #heading(level: 2, numbering: none)[Abstract]
 We present #smallcaps[Upppaal Coshy], a tool for automatic synthesis of a safety strategy---or _shield_---for Markov decision processes over continuous state spaces and complex hybrid dynamics. The general methodology is to partition the state space and then solve a two-player safety game #cite(label("DBLP:conf/vecos/BrorholtJLLS23")), which entails a number of algorithmically hard problems such as reachability for hybrid systems. The general philosophy of #smallcaps[Upppaal Coshy] is to approximate hard-to-obtain solutions using simulations. Our implementation is fully automatic and supports the expressive formalism of #smallcaps[Uppaal] models, which encompass stochastic hybrid automata.
 
-The precision of our partition-based approach benefits from using finer grids, which however are not efficient to store. We include an algorithm called \caap to efficiently compute a compact representation of a shield in the form of a decision tree, which yields significant reductions.
+The precision of our partition-based approach benefits from using finer grids, which however are not efficient to store. We include an algorithm called  #smallcaps[caap] to efficiently compute a compact representation of a shield in the form of a decision tree, which yields significant reductions.
 
 #pagebreak(weak: true)
 
@@ -54,10 +52,10 @@ algorithm partitions the state space into finitely many cells and then
 solves a two-player safety game, where it uses approximation through
 simulation to efficiently tackle algorithmically hard problems. In this
 tool paper, we present our implementation #smallcaps[Uppaal Coshy],
-which is fully integrated in Uppaal, offering an automatic tool
+which is fully integrated in #smallcaps[Uppaal], offering an automatic tool
 #footnote[Available at
 #link("https://uppaal.org/features/#coshy")[https://uppaal.org/features/\#coshy]]
-that supports the expressive Uppaal modeling formalism, including
+that supports the expressive #smallcaps[Uppaal] modeling formalism, including
 reinforcement learning under a shield.
 
 Our algorithm represents a shield by storing the allowed actions for
@@ -91,7 +89,7 @@ stochastic hybrid systems with non-periodic control and calls to
 external C libraries.
 
 One benefit of our tool is the full integration with
-Uppaal Stratego #cite(label("DBLP:conf/tacas/DavidJLMT15")) to directly use the
+#smallcaps[Uppaal Stratego] #cite(label("DBLP:conf/tacas/DavidJLMT15")) to directly use the
 synthesized shield in reinforcement learning.
 
 ==== Decision trees.
@@ -169,14 +167,14 @@ to $phi$ if all outcomes of $sigma$ are safe.
     caption: [Ball component.]
   )<fig:ball>],
   columns: (3fr, 6fr),
-  caption: [The #emph[bouncing ball] modeled in Uppaal.]
+  caption: [The #emph[bouncing ball] modeled in #smallcaps[Uppaal].]
 )
 <fig:uppaalball>
 
 We introduce our running example: a #emph[bouncing ball] that can be hit
 by a player to keep it
 bouncing #cite(label("DBLP:conf/vecos/BrorholtJLLS23")) #cite(label("DBLP:conf/atva/JaegerJLLST19")).
-We shortly explain our two-component Uppaal model. The player component
+We shortly explain our two-component #smallcaps[Uppaal] model. The player component
 is shown in @fig:player. In the (initial) location `Choose`, there
 are two available control actions (solid lines). The player chooses
 every 0.1 seconds (enforced by the clock `x`). The action (upper edge)
@@ -245,20 +243,20 @@ A shield $nu$ for $cal(T)_(cal(M) comma gamma comma omega)$ induces a
 shield $sigma$ for $cal(M)$ in the standard
 way #cite(label("DBLP:conf/vecos/BrorholtJLLS23")):
 
-<thm:safety_transfer> Given an EMDP $cal(M)$, a safety
+<thm:safety-transfer> Given an EMDP $cal(M)$, a safety
 property $phi subset.eq S$, and a grid $cal(P)_gamma^omega$, if $nu$ is
 a shield for $cal(T)_(cal(M) comma gamma comma omega)$, then
 $sigma lr((s)) eq nu lr((lr([s])_(cal(P)_gamma^omega)))$ is a shield
 for $cal(M)$.
 
 #figure(image("../Graphics/RP25/workflow.svg"),
-  caption: [Workflow for obtaining a near-optimal shielded strategy in Uppaal.]
+  caption: [Workflow for obtaining a near-optimal shielded strategy in #smallcaps[Uppaal].]
 )<fig:workflow>
 
 @fig:workflow shows the overall workflow of the shield
 synthesis and how the shield can later be used to (reinforcement-) learn
 a near-optimal strategy #emph[under this shield]. The green box marks
-the steps that we newly integrated in Uppaal.
+the steps that we newly integrated in #smallcaps[Uppaal].
 
 For the #emph[bouncing ball], we will obtain the shield shown in
 @fig:leave_bounds. To effectively implement the
@@ -309,7 +307,7 @@ approximate solution, which we outline in
 @sect:reachability.
 
 Thanks to the above design decisions, our implementation is fully
-automatic and supports the expressive formalism of general Uppaal models
+automatic and supports the expressive formalism of general #smallcaps[Uppaal] models
 (e.g., stochastic hybrid automata with calls to general C code).
 
 We also identified further practical challenges, which we address in the
@@ -358,13 +356,13 @@ error location.
 We approximate cell reachability $C arrow.r^a C prime$, as defined in
 @eq:cell_reachability, similarly
 to #cite(label("DBLP:conf/vecos/BrorholtJLLS23")) but adapted to work in
-Uppaal. In a Uppaal model, actions $a in A$ correspond to controllable
+Uppaal. In a #smallcaps[Uppaal] model, actions $a in A$ correspond to controllable
 edges (indicating that the controller can act).
 
 For each cell $C$ and action $a in A$, we iterate over all sampled
 states $s$ (as described before) and select the edge corresponding to
 $a$, which gives us a new state $s prime$; starting from $s prime$, we
-simulate the environment (using the built-in simulator in Uppaal) until
+simulate the environment (using the built-in simulator in #smallcaps[Uppaal]) until
 a state $s prime.double$ is reached in which the controller has the next
 choice (i.e., multiple action edges are enabled) again.
 #footnote[Where #cite(label("DBLP:conf/vecos/BrorholtJLLS23")) required a fixed
@@ -378,15 +376,15 @@ system underapproximates $cal(T)_(cal(M) comma gamma comma omega)$. As
 observed in #cite(label("DBLP:conf/vecos/BrorholtJLLS23")), the more
 simulations are run, the more likely do we obtain the true solution. To
 check whether this underapproximation is sufficiently accurate, the
-existing queries for statistical model checking in Uppaal can be used,
-as we shall see in @sect:evaluation.
+existing queries for statistical model checking in #smallcaps[Uppaal] can be used,
+as we shall see in @sect:coshyevaluation.
 
 In general, two simulations starting in the state $s$ may not yield the
 same state $s prime.double$ due to stochasticity.
 In #cite(label("DBLP:conf/vecos/BrorholtJLLS23")), stochasticity was treated as
 additional dimensions over which to sample (systematically). This was
 possible by manually crafting the reachability sampling for each model.
-Detecting stochastic behavior in Uppaal models automatically turned out
+Detecting stochastic behavior in #smallcaps[Uppaal] models automatically turned out
 to be difficult due to the rich formalism. Instead, we decided to simply
 let the simulator sample from the stochastic distribution. As a side
 effect, this new design allows us to support stochasticity with general
@@ -458,7 +456,7 @@ following choices determines the behavior:
 With @it:auto, samples are taken outside the
 specified bounds, similar to @sect:initial_safe. For the
 #emph[bouncing ball], our tool samples states such as $paren.l v eq 26$,
-$p eq 22$, #convertme[\$\\color{blue}{\\tt{Ball.Stop}})\$], even though these states
+$p eq 22$, `Ball.Stop`), even though these states
 may not be reachable in practice. If any sample state is found to be
 unsafe, $C_(italic("out"))$ is considered unsafe, and safe otherwise.
 The result of synthesizing a shield with this option is shown in
@@ -480,7 +478,7 @@ Therefore, we allow that variables are omitted from the grid
 specification. However, this raises a new challenge when sampling a
 state from a cell, since a concrete state requires a value for each
 variable. To address that, we set each omitted variable to the unique
-value of the initial state, which must always be specified in a Uppaal
+value of the initial state, which must always be specified in a #smallcaps[Uppaal]
 model. Hence, the user must define the initial state such that the
 values of omitted variables are sensible defaults. (Note that the
 initial state is ignored by the shield synthesis in all other respects.)
@@ -537,18 +535,19 @@ as $cal(P)_(cal(T))$. Our goal in this section is: given a decision tree
 $cal(T)$ inducing a partitioning $cal(P)_(cal(T))$, find an equivalent
 but smaller decision tree.
 
-#figure(table(columns: 5,
-    [],    [1], [2], [3], [4],
-    $s_1$, [0], [2], [3], [4],
-    $s_2$, [0], [2], [3], [4]
-  ),
-  caption: [Example of matrix $M$ for @fig:expRulesOrg]
-)<tab:matrixm>
   
 Given a tree $cal(T)$, we store all bounds $c$ of the predicates
 $s_i lt c$ in a matrix $M$ of $k$ rows where the $i$-th row contains the
 bounds associated with state dimension $s_i$ in ascending order. For
-example, consider the bounds in @fig:expRulesOrg and $M$ in @tab:matrixm.
+example, consider the bounds in @fig:expRulesOrg and $M$ in @eq:matrixm.
+
+$ #[#labelmat(
+    ([1], [2], [3], [4]),
+    ($s_1$, $s_2$),
+     [0], [2], [3], [4],
+     [0], [2], [3], [4]
+  )
+] $<eq:matrixm>
 
 We extract a bounds vector from $M$ via an index vector $p in bb(N)^k$
 such that the $i$-th entry of $p$ contains the column index for the
@@ -678,7 +677,7 @@ explosion. A more detailed description including pseudocode can be found
 in #cite(label("arxiv_version")).
 
 == Case Studies and Evaluation
-<sect:evaluation>
+<sect:coshyevaluation>
 In this section, we evaluate our implementation of #smallcaps[Uppaal
 Coshy] and #smallcaps[Caap]. In @sect:bb_queries, we
 demonstrate a typical application. In @sect:benchmarks, we
@@ -752,7 +751,7 @@ benchmark the implementations on several models.
       confidence interval.],
   )<tab:bb_queries>
 ]
-@tab:bb_queries shows a typical usage of Uppaal with a
+@tab:bb_queries shows a typical usage of #smallcaps[Uppaal] with a
 sequence of queries on the #emph[bouncing ball] example to produce a
 safe and efficient strategy (cf. @fig:workflow).
 Documentation of the new query syntax is available online and
@@ -810,7 +809,7 @@ unsafe.
 )
 
 State-space transformations can be used to synthesize a shield more
-efficiently #cite(label("DBLP:conf/vecos/BrorholtHLS24")). Since Uppaal
+efficiently #cite(label("DBLP:conf/vecos/BrorholtHLS24")). Since #smallcaps[Uppaal]
 supports function calls, transformations can be applied by modifying the
 model. Details can be found in #cite(label("arxiv_version")).
 
@@ -850,36 +849,14 @@ time.
     columns: 7,
     align: (col, row) => (left,center,right,right,right,right,right,).at(col),
     inset: 6pt,
-    [#strong[Model]], [#strong[$n$]], [#strong[$m$]], [#strong[Synthesis
-    time]], [#strong[Size]], [#strong[Reduction time]], [#strong[Reduced
-    size]],
-    [Bouncing ball],
-    [3],
-    [1],
-    [218s],
-    [1 430 000],
-    [53s],
+    table.header([#strong[Model]], [#strong[$n$]], [#strong[$m$]], [#strong[Synthesis time]], [#strong[Size]], [#strong[Reduction time]], [#strong[Reduced size]]),
+    [Bouncing ball], [3], [1],    [218s],    [$1 thin 430 thin 000$],    [53s],
     [2972],
-    [Boost converter],
-    [3],
-    [20],
-    [1 430s],
-    [136 800],
-    [21s],
+    [Boost \ converter], [3], [20],    [$1 thin 430s$],    [$136 thin 800$],    [21s],
     [571],
-    [Random walk],
-    [4],
-    [20],
-    [82s],
-    [40 000],
-    [1.5s],
+    [Random walk], [4], [20],    [82s],    [$40 thin 000$],    [1.5s],
     [60],
-    [Water tank],
-    [3],
-    [1],
-    [0.1s],
-    [168],
-    [0.1s],
+    [Water tank], [3], [1],    [0.1s],    [168],    [0.1s],
     [24],
   ),
   caption:[Computation time and sizes for synthesizing and reducing
@@ -898,12 +875,12 @@ Uppaal. We have also presented the #smallcaps[Caap] algorithm to reduce
 the shield representation significantly, which is crucial for deployment
 on an embedded device.
 
-We see several directions for future integration into Uppaal. As
+We see several directions for future integration into #smallcaps[Uppaal]. As
 discussed, our implementation does not apply #emph[systematic] sampling
 for random dynamics; however, we think that many sources of randomness
-in Uppaal models can be handled systematically. Currently, the reduction
+in #smallcaps[Uppaal] models can be handled systematically. Currently, the reduction
 algorithm #smallcaps[Caap] is implemented as a standalone tool, but it
-would be useful to also integrate it directly with Uppaal. During
+would be useful to also integrate it directly with #smallcaps[Uppaal]. During
 development, we found it helpful to visualize shields, as in
 @fig:bbshields, which could be offered in the user interface.
 In the same line, an explanation why a state is marked unsafe in a

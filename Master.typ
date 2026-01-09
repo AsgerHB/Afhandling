@@ -21,16 +21,16 @@
 #include "Frontmatter/Title Page.typ"
 #pagebreak(weak: true)
 #include "Frontmatter/Colophon.typ"
-#pagebreak(weak: true)
-#include "Frontmatter/CV.typ"
-#pagebreak(weak: true)
+#pagebreak(to: "even", weak: true)
+// #include "Frontmatter/CV.typ"
+// #pagebreak(weak: true)
 #include "Frontmatter/Abstract.typ"
 #pagebreak(weak: true)
 #include "Frontmatter/Dansk Abstract.typ"
 #pagebreak(weak: true)
 
-#outline(title: "Table of Contents")
-#pagebreak(weak: true)
+#outline(title: "Table of Contents", depth: 3)
+#pagebreak(to: "odd", weak: true)
 
 #include "Mainmatter/Introduction.typ"
 #pagebreak(to: "odd", weak: true)
