@@ -4,6 +4,76 @@
 
 #[
   #set heading(numbering: none)
+  = Introduction
+]
+
+
+==== Leading text:  Cyber-physical Systems and the Need for Scalable Verification
+
+== Safety
+
+== Reinforcement Learning
+=== Markov Decision Processes 
+
+== Shielding
+=== Shielding terms
+=== Effects on Convergence
+=== Probabilistic Shielding
+
+== Multi-agent systems
+
+== State of the Art 
+=== Hybrid Systems
+=== Tools
+=== Multi-agent Shielding
+
+== Research Statement and Goals
+
+== Contributions to the Field
+
+== Summary of Papers
+
+#[
+  #set heading(numbering: none)
+  === Paper A: Shielded Reinforcement Learning for Hybrid systems
+  === Paper B: Efficient Shield Synthesis via State-space Transformation
+  === Paper C: Compositional Shielding and Reinforcement Learning for Multi-agent Systems
+  === Paper D: #smallcaps[Uppaal Coshy] - Automatic Synthesis of Compact Shields for Hybrid Systems
+]
+
+#pagebreak()
+
+==== Terminology
+
+I would do well to define these terms in the text and use them consistently.
+
+/ System: The actual system in use.
+/ Model: A model of the system used for shielding, verfication and probably also training.
+  / MDP: You know.
+  / HMDP: Or whatever. 
+/ Shield: A component that enforces safety onto the model.
+/ Controller: A decision making algorithm thingy that is meant to act upon the system to achieve some outcome.
+/ Agent: A kind of controller, reinforcement learning implied. 
+/ Trace: Created from a controller and a model. 
+/ Real-world outcome: Created from a controller acting upon a system.
+
+#[
+  #set heading(numbering: none)
+  = Questions for my supervisors
+]
+== Kim
+ 
+ - Please have a look at my proposed structure and tell me what you think.
+ - The terms pre- and post-shielding seem to have had two competing definitions. Please give me some feedback for my section on the matter.
+ - When I discuss the origin of the term "shielding," should I cite both _On Time with Minimal Expected Cost_ and _UPPAAL STRATEGO,_ or just the latter?
+
+== Christian
+
+ - Please have a look at my proposed structure and tell me what you think.
+
+
+#[
+  #set heading(numbering: none)
   = Introduction 
 ]
 
@@ -35,8 +105,14 @@ This presumes an accurate model of the (cyber-physical) system under verificatio
 Neural networks are notable for having achieved impressive performance in a wide variety of tasks #citationneeded[alphago, atari games, chatgpt why not].
 This performance is achieved by controllers that use a high number of neurons, making direct formal verification infeasible.
 
+== Types of Model
+
+Formal definition of MDP, informal definition of HMDP.
+
+== Shielding
+
 Even when a controller cannot be verified directly, other approaches can be used to verify the safety of the system as a whole. 
-In #citationneeded[On time], it was shown how a safety propertty can be enforced through a maximally permissive, non-deterministic strategy.
+In #citationneeded[On time], it was shown how a safety property can be enforced through a maximally permissive, non-deterministic strategy.
 While acting within the constraints of this strategy, reinforcement learning was utilized to optimize for a second objective, achieveing a near-optimal strategy within the safety constraints.
 
 The term *shield* was coined in #citationneeded[Bloem et al.] to describe a component which would work in concert with a (mostly safe) controller, and intervene to prevent unsafe behaviour.
@@ -159,10 +235,10 @@ This may be desireable for models where infinite-horizon safety stratgies do not
 
 ==== Probabilistic shielding
 
-When there is no fully safe strategy due to uncertainty inherent in the model or in the actual system, probabilistic guarantees can be given.
+When uncertainty is inherent to a system, it might not be possible for any strategy to gurantee safety for all traces starting in the initial state. 
+Although such _absolute guanratees_ are not available, it might still be possible to give guarantees relating to staying safe with a specific probability.
 One such guarantee could be a $k$-step lookahead shield which guarantees a maximum risk of safety violation to occur within those $k$ steps.
-An obvious weakness of this guarantee is that there is always the possiblity, that at $k+1$  it is the case that failure is certian, and indeed already inevitable at step $k$.
-The shield would not be able to avoid such issues but I speuclate that these become less common as $k$ increases.
+This leaves the possiblity, that the state at step $k+1$ is unsafe for all actions that could be taken at $k$. 
 
 ==== Obtaining a Model
 
@@ -173,8 +249,7 @@ When no models are available, some things like erm automata learning or uncertia
 ==== Multi-agent shielding
 
 In many cyber-physical sytems, several components are working together to achieve distinct goals in the entire system. 
-These kinds of multi-agent sytems where different controllers are acting in tandem are called multi-agent system. 
-Since formal verification methods such as shields are highly affected by issues of scalability, multi-agent approahes are useful.
+Since formal verification methods are highly affected by issues of scalability, multi-agent approahes are useful.
 There is no silver bullet.
 
 ==== Tools
