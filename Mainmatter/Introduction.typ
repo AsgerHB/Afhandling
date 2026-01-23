@@ -2,93 +2,11 @@
 #import "@preview/cetz:0.4.2"
 #import "@preview/subpar:0.2.2"
 
+
 #[
   #set heading(numbering: none)
   = Introduction
 ]
-
-
-==== Leading text:  Cyber-physical Systems and the Need for Scalable Verification
-
-== Safety
-
-== Reinforcement Learning
-=== Markov Decision Processes 
-
-== Shielding
-=== Shielding terms
-=== Effects on Convergence
-=== Probabilistic Shielding
-
-== Multi-agent systems
-
-== State of the Art 
-=== Hybrid Systems
-=== Tools
-=== Multi-agent Shielding
-
-== Research Statement and Goals
-
-== Contributions to the Field
-
-== Summary of Papers
-
-#[
-  #set heading(numbering: none)
-  === Paper A: Shielded Reinforcement Learning for Hybrid systems
-  === Paper B: Efficient Shield Synthesis via State-space Transformation
-  === Paper C: Compositional Shielding and Reinforcement Learning for Multi-agent Systems
-  === Paper D: #smallcaps[Uppaal Coshy] - Automatic Synthesis of Compact Shields for Hybrid Systems
-]
-
-#pagebreak()
-
-==== Terminology
-
-I would do well to define these terms in the text and use them consistently.
-
-/ System: The actual system in use.
-/ Model: A model of the system used for shielding, verfication and probably also training.
-  / MDP: You know.
-  / HMDP: Or whatever. 
-/ Shield: A component that enforces safety onto the model.
-/ Controller: A decision making algorithm thingy that is meant to act upon the system to achieve some outcome.
-/ Agent: A kind of controller, reinforcement learning implied. 
-/ Trace: Created from a controller and a model. 
-/ Real-world outcome: Created from a controller acting upon a system.
-
-#[
-  #set heading(numbering: none)
-  = Questions for my supervisors
-]
-== Kim
- 
- - Please have a look at my proposed structure and tell me what you think.
- - The terms pre- and post-shielding seem to have had two competing definitions. Please give me some feedback for my section on the matter.
- - When I discuss the origin of the term "shielding," should I cite both _On Time with Minimal Expected Cost_ and _UPPAAL STRATEGO,_ or just the latter?
-
-== Christian
-
- - Please have a look at my proposed structure and tell me what you think.
-
-
-#[
-  #set heading(numbering: none)
-  = Introduction 
-]
-
-#cetz.canvas({
-  import cetz.draw: *
-  
-  content((1, 0),  text("🤖", size:  50pt) + v(25pt), name: "Agent")
-  content((10, 0),  text("🌏", size:  50pt) + v(25pt), name: "System")
-  content((5,0),  image("../Graphics/Shield.svg", height: 60pt) + v(-10pt), name: "Shield")
-  line("Agent.east", "Shield.center", stroke: (paint: alizarin, thickness: 5pt))
-  on-layer(-1, {
-    line("Agent.east", "Shield.east", stroke: (paint: alizarin, thickness: 5pt))
-    line("Shield.east", "System.west",  stroke: (paint: emerald, thickness: 5pt), mark: (end:  (symbol: ">")))
-  })
-})
 
 Digital control of physical components enables time-saving automation and efficient use of available resources.
 This can range from a simple on/off switch to a complex neural network managing multiple processes. 
