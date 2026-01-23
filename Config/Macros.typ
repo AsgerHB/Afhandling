@@ -72,5 +72,6 @@
 // Cite Label (CL) shorthand to use mostly with dblp
 #let cl(label_string) = cite(label(label_string))
 
-#let act = $A c t$
+#let Act = $A c t$
 #let mdp = $cal(M)$
+#let powerset(x) = $scr(P)(#x)$

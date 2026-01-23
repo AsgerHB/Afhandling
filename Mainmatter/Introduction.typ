@@ -34,15 +34,24 @@ In contrast, reinforcement learning _agents_ are actively interacting with a sys
 
 The interaction between an agent and a system is illustrated in @fig:RL as an unending loop.
 The agent observes its current state, and makes a decision on which action to take, based on its current policy and exploration strategy (e.g. $epsilon$-greedy).
+Taking the action yields a reward that the agent can use to update its policy, and an observation of the updated state which it will use to pick the next action.
 
+The reinforcement learning problem can be stated in many different ways -- depending on the nature of the problem -- but is perhaps most commonly defined in terms of a Markov decision process (MDP) #cl("DBLP:journals/siamrev/Feinberg96").
+MDPs describe stochastic systems, where the outcomes of actions only depend on the current (observable) state of the system, and not on which actions or states were seen previously.
+An MDP can be described by a tuple $(S, s_0 Act, P, R)$ where
 
-The reinforcement learning problem can be stated in many different ways depending on the nature of the problem, but is perhaps most commonly defined in terms of a Markov decision process (MDP) #cl("DBLP:journals/siamrev/Feinberg96").
+ - $S$ is a set of states,
+ - $s_0 in S$ is an initial state,
+ - $Act$ is a set of actions,
+ - $P : S times Act times S -> [0; 1]$ with  $forall s in S, a in Act : sum_(s' in S) P(s, a, s') = 1$ gives the probability of reaching state $s'$ from state $s$ as a result of  taking the action $a$, 
+ - and $R : S times Act -> RR$ gives the reward $R(s, a)$ for taking action $a$ in state $s$.
 
-#todo[Describe]
+A _policy_ (or strategy) is any method -- such as a reinforcement learning agent -- for choosing the next action from a given state. 
+Policies can either be _deterministic_ $pi : S -> Act$, uniquely selecting one specific action for each state, _probabilistic_ $rho : S times Act -> [0; 1]$, giving a probability distribution over actions, or _nondeterministic_ $sigma : S -> powerset(Act)$
+
+Given a e.g. deterministic policy $pi : S -> Act$, the outcomes of an MDP are sequences of states and actions interleaved $s_0 a_0 s_1 a_1 s_2 a_2 ...$ such that $pi(s_i) = a_i$ and $P(s_i, a_i, s_(i+1)) > 0$.
 
 #figure(include("../Graphics/Intro/Unshielded.typ"), caption: [The reinforcement learning loop.] )<fig:RL>
-
-#todo[Formal definition of MDP, informal definition of HMDP.]
 
 It can sometimes be useful to view machine learning as consisting of two different phases: Initial _training,_ and subsequent _operation_ as part of a real-life system.
 In the common view of reinforcement learning, the agent is continually exploring, learning, and improving, even when in operation.
@@ -106,8 +115,8 @@ When no models are available, some things like erm automata learning or uncertai
 The methods of corrective action taken by the shield can vary depending on the model and the application.
 The terms pre- and post-shielding have been used in the literature to describe a shield's relationship with the controller, but with two distinct sets of meaning:
 
- + In one part of the literature, pre- and post-shielding refer to _how_ the shield ensures only safe actions are enacted upon the environment @AlshiekhBEKNT18 #cl("DBLP:journals/cacm/KonighoferBJJP25") @MedicalShielding #cl("DBLP:conf/isola/TapplerPKMBL22").
- + Alternatively the terms can refer to _when_ a shield is applied, in the process of obtaining a controller @jakobs_thesis @BrorholtJLLS23.
+ + In one part of the literature, pre- and post-shielding refer to *how* the shield ensures only safe actions reach environment #cl("DBLP:journals/corr/abs-1708-08611") #cl("DBLP:journals/cacm/KonighoferBJJP25") @MedicalShielding #cl("DBLP:conf/isola/TapplerPKMBL22").
+ + Alternatively the terms can refer to *when* a shield is applied, in the process of obtaining a controller @jakobs_thesis @BrorholtJLLS23.
 
 In the following, we shall use the terms pre- and post-shielding to mean the former, while we dub the latter meaning resp. end-to-end shielding and post-hoc shielding.
 
@@ -124,7 +133,7 @@ In the following, we shall use the terms pre- and post-shielding to mean the for
 )
 
 ===== Pre-shielding
-This term refers to the shield restricting the behaviour the controller, by providing a set of actions $A subset.eq act$ that are permitted for the given state.
+This term refers to the shield restricting the behaviour the controller, by providing a set of actions $A subset.eq Act$ that are permitted for the given state.
 The controller must be set up in such a way as to only pick an action $a$ if it is included in the set $A$ it receives from the shield.
 
 ===== Post-shielding
