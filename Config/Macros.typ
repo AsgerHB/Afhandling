@@ -1,11 +1,11 @@
-#import "Colors.typ" : *
+#import "Colours.typ" : *
 
 
 #let infobox(content, title: none, width: 100%) = {
   set align(left)
   stack(dir: ttb,
-    box({set text(fill: white); title}, stroke: 1pt + black, inset: 1em, fill: wetasphalt, width: width),
-    box(content, stroke: 1pt + black, inset: 1em, fill: clouds, width: width),
+    box({set text(fill: white); title}, stroke: none, inset: 1em, fill: wetasphalt, width: width),
+    box(content, stroke: none, inset: 1em, fill: clouds, width: width),
   )
 }
 
@@ -54,14 +54,23 @@
 )
 
 #let todo(content) = {
-  set text(font: "Fira Code", size: 8pt) 
+  set text(font: "Fira Code", size: 8pt, fill: wetasphalt) 
   h(-3.8em)
   text(fill: green, weight: "bold")[TODO: ]
   content
   [ \ ]
 }
 
-#let citationneeded(content) = if (not (content == [] or content == none)) {super[\[#text(fill:red, content)\]]} else {super[\[#text(fill: red, "Citation Needed")\]]}
+#let citationneeded(content) = {
+  if (not (content == [] or content == none)) {
+    [\[#text(size: 7pt, fill: red, content)\]]
+  } else {
+      [\[#text(size: 7pt, fill: red, "Citation Needed")\]]
+  }
+}
 
 // Cite Label (CL) shorthand to use mostly with dblp
 #let cl(label_string) = cite(label(label_string))
+
+#let act = $A c t$
+#let mdp = $cal(M)$
