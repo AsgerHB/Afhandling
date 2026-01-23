@@ -468,7 +468,7 @@ in @fig:leave_bounds.
 
 === Omitting Variables from Consideration
 <sect:missing_variables>
-As emphasized in #cite(label("DBLP:conf/aaai/AlshiekhBEKNT18")), a shield can
+As emphasized in @AlshiekhBEKNT18, a shield can
 be obtained from an abstract model that only simulates behaviors
 relevant to the safety specification. For example, cost variables may
 only be relevant during learning. While every variable in a model can be
@@ -830,7 +830,7 @@ state space is continuous and the outcomes of actions follow uniform
 distributions.
 
 In the #emph[water tank] model inspired
-from #cite(label("DBLP:conf/aaai/AlshiekhBEKNT18")), a tank must be kept from
+from @AlshiekhBEKNT18, a tank must be kept from
 overflowing or running dry. Water flows from the tank at a rate that
 varies periodically. At each time step, the player can control the
 inflow by switching a pump on or off. The state space is discrete.

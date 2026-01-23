@@ -43,7 +43,7 @@ However, learned policies lack guarantees, which prevents applications
 in safety-critical domains.
 
 An attractive algorithmic paradigm to provably safe RL is
-#emph[shielding] #cite(label("DBLP:conf/aaai/AlshiekhBEKNT18")). In this
+#emph[shielding] @AlshiekhBEKNT18. In this
 paradigm, one constructs a #emph[shield], which is a nondeterministic
 policy that only allows safe actions. The shield acts as a guardrail for
 the RL agent to enforce safety both during learning (of a concrete
@@ -200,7 +200,7 @@ game-theoretic results, where they are called #emph[winning
 strategies] #cite(label("DBLP:reference/mc/BloemCJ18")). Early applications of
 shields in learning were proposed for timed
 systems #cite(label("DBLP:conf/atva/DavidJLLLST14")) and discrete
-systems #cite(label("DBLP:conf/aaai/AlshiekhBEKNT18")). The idea has since been
+systems @AlshiekhBEKNT18. The idea has since been
 extended to probabilistic
 systems #cite(label("DBLP:conf/concur/0001KJSB20")) #cite(label("DBLP:conf/ijcai/YangMRR23")),
 partial observability #cite(label("DBLP:conf/aaai/Carr0JT23")), and

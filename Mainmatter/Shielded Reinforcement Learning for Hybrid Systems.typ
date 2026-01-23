@@ -130,7 +130,7 @@ in the tool #smallcaps[Uppaal Stratego] #cite(label("stratego")). The term
 al. #cite(label("DBLP:conf/tacas/BloemKKW15")), who introduced special
 conditions on the enforcer like #emph[shields with minimal interference]
 and #emph[k-stabilizing shields] and later demonstrated shielding for RL
-agents #cite(label("10.5555/3504035.3504361")), where they correct potentially
+agents @AlshiekhBEKNT18, where they correct potentially
 unsafe actions chosen by the RL agent. Jansen et
 al. #cite(label("jansen2020safe")) introduced shielding in the context of RL
 for probabilistic systems. A concept similar to shielding has also been
