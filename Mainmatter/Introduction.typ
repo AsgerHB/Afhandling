@@ -71,26 +71,24 @@ This assumption about the model is made w.l.o.g. to simplify notation.
 
 A _policy,_  is any method (such as a reinforcement learning agent) for choosing the next action from a given state. 
 
-
 Policies can either be 
  - _probabilistic_ $S times Act -> [0; 1]$, giving a probability distribution over actions, 
  - _deterministic_ $S -> Act$, uniquely selecting one specific action for each state, 
  - or _nondeterministic_ $S -> powerset(Act)$, giving a subset $A subset.eq Act$ of possible actions. 
 
-Given an e.g. nondeterministic policy $sigma : S -> powerset(Act)$, a trace $xi$ of an MDP is an interleaved series of states and actions $xi = s_0 a_0 s_1 a_1 s_2 a_2 ...$ such that $a_i in sigma(s_i)$ and $P(s_i, a_i, s_(i+1))$. Traces are defined similarly for deterministic and probabilistic functions.
+Given an e.g. nondeterministic policy $pi : S -> powerset(Act)$, a trace $xi$ of an MDP is an interleaved series of states and actions $xi = s_0 a_0 s_1 a_1 s_2 a_2 ...$ such that $a_i in pi(s_i)$ and $P(s_i, a_i, s_(i+1))$.
+Traces are defined similarly for deterministic and probabilistic functions.
 Since @def:mdp does not include a stopping condition, traces will be infinite. A finite trace $s_1, a_1 ... a_(n-1), s_n$ can be defined as the first $n$ steps of an infinite trace, or by introducing a stopping criterion. This could be a set of terminal states $T$, or a probability $1 - gamma$ that the system abruptly halts. 
-
-Given a set $phi subset.eq S$ of safe states, we say a trace $xi$ is safe (with regards to $phi$) if for every $s_i$ in $xi$, $s_i in phi$.
 
 For a finite trace, $xi = s_0 a_0 s_1 a_1 ... a_(n-1) s_n$ the (undiscounted) reward can be defined as $R(xi) = sum_(i=0)^n R(s_i)$.
 This definition is less useful for infinite traces, as we will see in the following example:
 
 #example[
-  For an MDP $mdp$, the policy $sigma_1$ produces the infinite trace $xi_1$ and the policy $sigma_2$ produces the infinite trace $xi_2$. 
+  For an MDP $mdp$, the policy $pi_1$ produces the infinite trace $xi_1$ and the policy $pi_2$ produces the infinite trace $xi_2$. 
   The infinite trace $xi_1 = s_0 a_0 s_1 a_1 ...$ visits states that each yield a reward of $R(s_i) = 1 $.
   In contrast, the infinite trace $xi_2 = t_0 b_0 t_1 b_1 ...$ visits states that yield a reward of $R(t_i) = 100$.
 
-  Is the policy $sigma_2$ more useful than $sigma_1$? We see that 
+  Is the policy $pi_2$ more useful than $pi_1$? We see that 
   $ R(xi_1) &= lim_(n -> infinity) sum_(i=0)^n 1 && = infinity  = 
    R(xi_2) &= lim_(n -> infinity) sum_(i=0)^n 100 $
 ]<ex:undiscounted>
@@ -101,7 +99,7 @@ Note that in the special case where $gamma = 1$, $R_1$ is the same as the undisc
 The discount factor $gamma$ may be interpreted as the probability of the trace continuing, while with probability $1 - gamma$ the trace may end in the next step, losing access to future rewards.
 
 #example[
-  With $sigma_1$ and $sigma_2$ as in @ex:undiscounted, we can use a discounted reward to compare them.
+  With $pi_1$ and $pi_2$ as in @ex:undiscounted, we can use a discounted reward to compare them.
   For e.g. $gamma = 0.99$ we have the geometric series
   $ R_0.99(xi_1) & = lim_(n -> infinity) sum_(i=0)^n 0.99^i 1 && = 1/(1-0.99) = 100  "and" \
   R_0.99(xi_2) & = lim_(n -> infinity) sum_(i=0)^n 0.99^i 100 && = 100/(1-0.99) = 10000 $
@@ -111,104 +109,136 @@ In contrast to the reward gained from just one trace, the expected discounted re
 #question[Defined as or derived?]
 
 #definition(name: "Expected reward")[
-  Given an MDP $M = (S, s_0, Act, P, R)$, a probabilistic policy $sigma$ and a discount factor $gamma$, the expected reward of $sigma$ on $mdp$ is the fixed point of the following equation
+  Given an MDP $M = (S, s_0, Act, P, R)$, a probabilistic policy $pi$ and a discount factor $gamma$, the expected reward of $pi$ on $mdp$ is the fixed point of the following equation
 
-  $ EE_sigma^mdp (s) = sum_(a in Act) sigma(s, a) sum_(s' in S) P(s, a, s') (R(s') + gamma  EE_sigma^mdp (s')) $ 
-]
+  $ EE_pi^mdp (s) = sum_(a in Act) pi(s, a) sum_(s' in S) P(s, a, s') (R(s') + gamma  EE_pi^mdp (s')) $ 
+]<eq:ExpectedReward>
 
 This is used in the definition of the optimization problem of finding the policy with the highest expected discounted reward for $mdp$.
 
 #definition(name:"Optimization problem")[
-  Given an MDP $mdp = (S, s_0, Act, P, R)$ and a discount factor $gamma$, find the policy $sigma^star$ such that
+  Given an MDP $mdp = (S, s_0, Act, P, R)$ and a discount factor $gamma$, find the policy $pi^star$ such that
 
-  $ sigma^star = argmax_(sigma) EE_gamma^mdp (sigma) $
+  $ pi^star = argmax_(pi) EE_gamma^mdp (pi) $
 ]<def:optimization>
 
-It may be possible to compute $sigma^star$ directly, through e.g. value- or policy iteration. #citationneeded[]
+It may be possible to compute $pi^star$ directly, through e.g. value- or policy iteration. #citationneeded[]
 But these methods run into scalability issues on the size of the state-space $S$, and require full knowledge of the transition probabilities $P$ and rewards $R$. 
 If the state-space is prohibitively large, or the MDP is not fully known but can be sampled from, the optimal policy may instead be approximated through learning. 
 
 State of the art reinforcement learning techniques learn intricate behaviour through deep neural networks #citationneeded[] and decision trees #citationneeded[] such as PPO #citationneeded[] and MuZero #citationneeded[].
 In the following, a description of the comparatively simple Q-learning approach will be given. The method serves to illustrate the core concepts of reinforcement learning, such as the difference between on-policy and off-policy learning, value estimation, and exploration strategies. 
 
+=== Q-learning
+
 Q-learning @I:QLearning is a model-free, off-policy, reinforcement learning algorithm for models that have a finite, or countably infinite state-space.
 (Although it may not work well in practice for the latter.)
 The algorithm maintains a "Q-table" for every pair $(s, a)$ that represents the estimated expected reward for taking action $a$ in state $s$.
-This "table" will be represented here as a function $Q : S times Act -> RR$.
-The table can be initialized arbitrarily,.#footnote[However if the model has terminal states $T subset S$, then then $Q_0$ must be initialized such that $forall t in T, a in Act : Q_0 (t, a) = 0$.] e.g. $Q_0 (s, a) = 1$ for all $s in S, a in A$
-Subsequent assignments $Q_0, Q_1, Q_2$ represent the Q-table at step $t$ in the algorithm.
-A notational shorthand $Q_(t+1) (s, a) = x$ is used to define the next function, where $Q_(t+1) (s', a') = cases(x  "if"  s' = s and a' = a, Q_t)$.
+This "table" will be represented here as a function $Q : S times Act -> RR$ which is updated in every step.
+The table can be initialized arbitrarily,.#footnote[However if the model has terminal states $T subset S$, then $Q$ must be initialized such that $forall t in T, a in Act : Q (t, a) = 0$.] e.g. $Q (s, a) = 0.1$ for all $s in S, a in A$.
+The notational shorthand $Q (s, a) = x$ is used to describe updates to the function where its value is changed to $x$ for $Q(s, a)$, while remaining unaltered for all other values in its domain.
 
-Updates are performed according to a learning rate $alpha: NN -> [0; 1[$, which should be a function over the learning steps such that $sum_i^infinity alpha(i) = infinity and sum_i^infinity alpha(i)^2 < infinity$.
-
-This all combines to give the Q-learning loop in @alg:QLearning, with the update rule in shown in @l:QUpdate.
-If the model includes terminal states, the algorithm can be modified with an additional loop to restart from $s_0$ when a trace ends.
+By gradual updates to $Q$, the function should approximate the expected value of taking action $a$ in state $s$, both in terms of immediate reward, and discounted future reward.
+The method of approximation is given in @alg:QLearning, with the update rule in shown in @l:QUpdate.
+Note the similarity of the update rule to @eq:ExpectedReward.
+The algorithm has additional input parameters, which will be described in the following.
 
 #figure(kind: "Algorithm", supplement: "Algorithm", pseudocode-list[
-    - *Input:* MDP $mdp = (S, s_0, Act, P, R)$,  
-      number of steps $n$,
+    - *Input:* MDP $mdp = (S, s_0, Act, P, R)$, 
       discount factor $gamma$,
+      initial $Q : S -> RR$,
+      number of episodes $n$,
+      episode length $m$,
       learning rate $alpha : NN -> [0; 1[$,
-      initial $Q_0 : S -> RR$,
       and 
-      exploration factor $epsilon in ]0; 1]$.
+      exploration factor $epsilon : NN ->  ]0; 1]$.
       
-    - *Output:* Approximation $hat(sigma)$ of optimal policy.
-    + *Loop* $i = 0$ *up to* $n$ #h(1fr) $triangle.r$ Initially $s_i  = s_0$
-      + *With probability  $epsilon$:*  Select $a_i$ according to a uniform distribution over $Act$
-      + *Otherwise:* $a _i = argmax_a Q_i (s_i, a) $
-      + Take action $a_i$ in state $s_i$ and observe the next state $s_(i + 1)$
-      // + Select $s_(i + 1)$ according to the distribution ${(s, p) | s in S, p = P(s_i, a_i, s)}$
-      + #line-label(<l:QUpdate>) 
-        $Q_(i+1) (s_i, a_i) &= \ &Q_i (s_i, a_i) + alpha (i) (R(s_i, a, s_(i+1)) + gamma max_a Q_i (s_(i+1), a) - Q_i (s_i, a_i))$
-    + *Return* $hat(sigma) (s) = argmax_a Q_(i + 1) (s, a)$
+    - *Output:* Approximation $hat(pi)$ of optimal policy.
+    + *Loop*  $i=0$ *up to* $n$
+      + $s = s_0$
+      + *Loop* $m$                          #line-label(<l:EpisodeLoop>)
+        + Flip a weighted coin that has probability $epsilon(i)$ of landing on heads.
+        + *If* heads *then*  select $a$ according to a uniform distribution over $Act$
+        + *Else* $a  = argmax_(a' in Act) Q (s, a') $
+        + Take action $a$ in state $s$ of $mdp$ and let the next state be  $s'$
+        + #line-label(<l:QUpdate>) 
+          $Q (s, a) = Q (s, a) + alpha (i) (R(s, a, s') + gamma max_(a' in Act) Q (s', a') - Q (s, a))$
+    + *Return* $hat(pi) (s) = argmax_(a in Act) Q (s, a)$
   ],
   caption: "Q-learning"
 )<alg:QLearning>
 
-The approximate policy will, with probability 1, converge $lim_(n -> infinity) hat(sigma) = sigma^star$ under the following  additional assumptions:
- - The reward attainable in a single step is bounded,#footnote[Trivially satisfied for MDPs with finite state space.] i.e. $exists beta in RR forall s in S : R(s, a, s') < beta$ .
- - The initial state $s_0$ is reachable in one or more steps, from every other state in $S$.
+The algorithm explores the model $mdp$ over a number of episodes $n$, which are finite traces that are cut off at length $m$.
+This inner loop ensures, that $s_0$ will be visited at least $n$ times.
+Setting $m$ too low may impact the estimate, since the policy will not be able to capitalize on future rewards beyond step $m$. 
+Thus, $m$ should be picked according to $gamma$ such that $gamma^m$ is suitably low. 
 
-Due to the $epsilon$-greedy exploration strategy, the latter assumption is will guarantee that each reachable state $s$ is visited infinitely often. It will further guarantee that each action $a$ is taken infinitely often at each $s$, that is reachable from $s_0$.
-This lets the Q-update in @l:QUpdate accurately estimate the true expected value of executing $a$ in $s$. 
-In a model with terminal states, this guarantee can be met by ensuring that traces terminate with probability 1. Similarly, the model may be constructed so it resets to $s_0$ with a small probability $1 - gamma$ each step.
+Updates are performed according to a learning rate $alpha: NN -> [0; 1[$, which should be a function over the learning steps such that $sum_i^infinity alpha(i) = infinity and sum_i^infinity alpha(i)^2 < infinity$.
+This represents how much the new experience should influence the estimation of $Q(s,a)$.
+As the number of episodes increases, so does the number of times $Q(s,a)$ is updated, and the decreasing learning rate reflects growing confidence in the estimate.
+
+@alg:QLearning uses an $epsilon$-greedy exploration policy, to guarantee that every transition triple $(s, a, s')$  with $P(s, a, s') > 0)$  is seen infinitely often in an infinite number of episodes.
+The guarantee holds since $epsilon : NN -> ]0;1]$ cannot go to 0. 
+#todo[Write that Q-learning is off-policy because the Q-update does not factor in the $epsilon$ probability of taking another action.]
+
+Q-learning is an early example of an algorithm which was proven to almost surely converge as the number of episodes $n$ (and episode length $m$) goes to infinity. 
+The intuition behind the proof is, that the value update in @l:QUpdate requires that every transition triple $(s, a, s')$ occurs infinitely often.
+This is ensured by the fact that $s_0$ is visited infinitely often as $n -> infinity$ and that there is always a non-zero chance (by $epsilon(i) > 0$) of eventually reaching state $s$ and taking action $a$ in $s$.
+
+#example(name: "Grid World")[
+  The system called Grid World is defined by the MDP $cal(G) = ({1, 2, ... 16}, 14, {←, ↑, →, ↓}, P, R)$. 
+  The state-space can be thought of as laid out in a $4 times 4$ grid as illustrated in @fig:GridWorld, with $s_0$ marked by 🤖.
+  With the exception of states 10, 11, (🧊) 15 (💀) and 16(🪙), transitions are deterministic. Transitions follow the cardinal direction indicated by the action, but staying in place when the action would otherwise leave the grid. 
+  For example, $P(1, →, 2)  = 1$ (0 for any other $(1, →, s)$), $P(2, ↓, 6) = 1$ and $P(5, ←, 5) = 1$.
 
 
-#example(name: "Grid world")[
-  Initial state 🤖, slip-chance 0.2 at 🧊. 
-  Return to 🤖 when visiting 🪙 or 💀.
-  Reward 10 for visiting 🪙. Reward -100 for visiting 💀.
-
-  Parameters: $gamma = 0.99$, $epsilon(i) = alpha(i) = cases(0.1 "if" i < n/4, 0.1/(1 + 0.01*(t - i/4)))$
     #figure(
       {
         set text(size: 6pt, fill: alizarin)
         table(
-          stroke: 0.6pt,
+          stroke: 0.4pt,
           columns: (4em, 4em, 4em, 4em),
           rows: 4,
           inset: 3pt,
           [ 1], [ 2], [ 3], [ 4 \ #hide([🧊])],
           [ 5], [ 6], [ 7], [ 8 \ #hide([🧊])],
-          [ 9], [ 10], [ 11 \ 🧊], [12],
-          [ 13 \ 🤖], [ 14], [ 15 \ 💀], [ 16 \ 🪙],
+          [ 9], [ 10 \ 🧊], [ 11 \ 🧊], [12],
+          [ 13], [ 14 \ 🤖], [ 15 \ 💀], [ 16 \ 🪙],
         )
       },
-      caption: [A simple grid-world.]
-    )
+      caption: [A map of Grid World.]
+    )<fig:GridWorld>
   
+  In states 10 and 11, there is a 0.625 probability of moving in the manner described above, while the remaining probability mass is distributed among the other directions, i.e. $P(11, →, 15) = 0.125$. States 15 and 16 are terminal, which is modelled as $P(15, a, 15) = 1$ and $P(16, a, 16) = 1$ for any $a$. 
+  
+  The reward is defined for any action $a$ as 
+   - $R(15, a, 15) = 0$ and $R(16, a, 16) = 0$. (Terminate in 💀 and 🪙.)
+   - $R(s, a, 15) = -10$ for $s != 15$. (💀)
+   - $R(s, a, 16) = 10$ for $s != 16$. (🪙)
+   - $R(s, a, s') = -1$ otherwise.
+  
+  Consider a discount factor of  $gamma = 0.99$, episode length $m=100$, learning rate, and exploration factor $alpha(i) = epsilon(i) = cases(0.1 "if" i < n/4, 0.1/(1 + 0.01*(t - i/4)))$.
+
+  Outcomes of Q-learning in Grid World $cal(G)$ with these parameters are shown in @fig:gridQ. The graph in @fig:QGraph100 shows the sum of rewards collected in each episode, up to $n=100$.
+  The resulting policy is visualized in @fig:VTable100, which shows for every state $s$, the policy's action $a = argmax_a' Q(s, a')$, and the value $Q(s, a)$.
+  Since the learning process is stochastic, the resulting policy will vary. 
+  In this case, the policy traverses both states 10 and 11, taking a fast but risky route to the 🪙 goal. 
+  Notice how the values have still not converged, and that the estimates are least accurate for the states furthest from the policy's route. 
+  A better estimate is given in @fig:VTable10e6. For example the value of state 8 has converged to $Q(8, ↓) = R(8, ↓, 12) + gamma Q(12, ↓) = -1 + 0.99 times 10 = 8.9$. 
+  This policy passes through state 10 but avoids state 11.
+
+  #todo[Why is that anyway? By my calculations -10*0.125 = -1.25 but the cost of going around s11 is $-1 - 1*0.99$=#{-1 - 1*0.99} ]
 
   #subpar.grid(columns: 3, 
-    figure(image("../Graphics/Intro/Q-learning 100.png"),
+    [#figure(image("../Graphics/Intro/Q-learning 100.png"),
       caption: [Cumulative reward up to 100 steps \ #hide("hello")]
-    ),
-    figure(image("../Graphics/Intro/V-table 100.png"),
-      caption: [Action and value $max_a Q(s, a)$ \ after 100 steps.]
-    ),
-    figure(image("../Graphics/Intro/V-table 10000.png"),
-      caption: [Action and value $max_a Q(s, a)$ \ after 10000 steps.]
-    ),
+    )<fig:QGraph100>],
+    [#figure(image("../Graphics/Intro/V-table 100.png"),
+      caption: [Value $max_a Q(s, a)$ and best action \ after 100 steps.]
+    )<fig:VTable100>],
+    [#figure(image("../Graphics/Intro/V-table 10e6.png"),
+      caption: [Value $max_a Q(s, a)$ and best action \ after 1 000 000 steps.]
+    )<fig:VTable10e6>],
     label: <fig:gridQ>,
     caption: [Q-learning in the grid world.]
   )
@@ -230,12 +260,25 @@ In Q-learning, the training phase would be exactly as @alg:QLearning, while the 
 
 #todo[Introduce safety as a set of states, as opposed to liveness]
 
-#todo[RL alone doesn't converge to safe policies.]
 
-Even when a policy cannot be verified directly,
-#todo[because it's infeasible to  do so]
-other approaches can be used to verify the safety of the system as a whole.
-#todo[why is this easier?]
+#definition(name: "Safe states, traces and policies")[
+  For an MDP $mdp$ and a safety property $phi subset.eq S$, a state $s in S$ is safe if $s in phi$. 
+  Furthermore, a trace $xi$ is safe (with regards to $phi$) if for every $s_i$ in $xi$, $s_i in phi$.
+  By extension, a policy $pi$ is safe wrt. $phi$ if every trace given $pi$ is safe.
+ 
+ Safety with regards to $phi$ is indicated with $models$, as respectively $s models phi$, $xi models phi$ and $pi models phi$.
+]
+
+#definition(name: "Shield, maximally permissive shield, shielded policy")[
+  For an MDP $mdp$ and safety property $phi$, a shield is a nondeterministic policy $shield : S -> Act$ such that every trace $xi$ given $shield$ is safe.
+  
+  A shield $shield$ is maximally permissive if for all states $s in S$, there is no other shield $shield'$ such that $shield(s) subset shield'(s)$.
+
+  A deterministic policy $pi$ is shielded by $shield$ if $forall s in S : pi(s) in shield(s)$. Similarly for a nondeterministic policy if $forall s in S : pi(s) subset.eq shield(s)$. And for a probabilistic policy if $pi(s, a) > 0 -> a in shield(s)$.
+]
+
+#todo[Extend the Grid World example to safety.]
+#todo[It is intricately difficult to verify that RL converges to a safe policy.]
 
 #todo[This goes in related work; go directly to formal definition of shielding.]
 
@@ -273,24 +316,19 @@ This may be desirable for models where infinite-horizon safety strategies do not
 
 ==== Probabilistic shielding
 
-When uncertainty is inherent to a system, it might not be possible for any strategy to guarantee safety for all traces starting in the initial state.
-Although such _absolute guarantees_ are not available, it might still be possible to give guarantees relating to staying safe with a specific probability.
-One such guarantee could be a $k$-step lookahead shield which guarantees a maximum risk of safety violation to occur within those $k$ steps.
-This leaves the possibility, that the state at step $k+1$ is unsafe for all actions that could be taken at $k$.
-
-#todo[Expand this section with types of probabilistic guarantees.]
+#todo[Write this section]
 
 ==== Obtaining a Model
 
-Many formal verification tools assume that an accurate model of the system is available.
-This model could be provided by a domain expert, but in other cases it might not be available.
-When no models are available, some things like erm automata learning or uncertain MDPs might be useful. #citationneeded[] #cl("I:DBLP:conf/isola/TapplerPKMBL22")
+// Many formal verification tools assume that an accurate model of the system is available.
+// This model could be provided by a domain expert, but in other cases it might not be available.
+// When no models are available, some things like erm automata learning or uncertain MDPs might be useful. #citationneeded[] #cl("I:DBLP:conf/isola/TapplerPKMBL22")
 
-#todo[Expand this section.]
+#todo[Write this section]
 
 === Applying the Shield
 
-The methods of corrective action taken by the shield can vary depending on the model and the application.
+How a policy is shielded can vary depending on the model and the application.
 The terms pre- and post-shielding have been used in the literature to describe a shield's relationship with the policy, but with two distinct sets of meaning:
 
  + In one part of the literature, pre- and post-shielding refer to *how* the shield ensures only safe actions reach environment #cl("I:DBLP:journals/corr/abs-1708-08611") #cl("I:DBLP:journals/cacm/KonighoferBJJP25") @I:MedicalShielding #cl("I:DBLP:conf/isola/TapplerPKMBL22").
@@ -316,9 +354,13 @@ In the following, we shall use the terms pre- and post-shielding to mean the for
 This term refers to the shield restricting the behaviour of the the policy, by providing a set of actions $A subset.eq Act$ that are permitted for the given state.
 The policy must be set up in such a way as to only pick an action $a$ if it is included in the set $A$ it receives from the shield.
 
+For Q-learning this would require modifying @alg:QLearning so instead of maximising over all actions $max_(a in Act)$ it considers only safe actions $max_(a in shield(s))$, e.g. 
+$ Q (s, a) = Q (s, a) + alpha (i) (R(s, a, s') + gamma max_(a' in shield(s')) Q (s', a') - Q (s, a)) $
+
+
 ===== Post-shielding
-Contrary to pre-shielding, this configuration is transparent to the policy.
-In post-shielding the policy outputs an action $a$ to the shield, rather than sending it directly to the environment.
+Contrary to pre-shielding, this configuration is transparent to the reinforcement learning algorithm.
+In post-shielding the algorithm applies action $a$ to the shield, rather directly to the environment.
 The shield then evaluates the action $a$, checking if it is in the set of permissible actions $a in A$s.
 If the action is permitted, $a$ is sent to the environment unaltered.
 Otherwise, the action $a$ is replaced with an alternative, permissible action $a' in A$.

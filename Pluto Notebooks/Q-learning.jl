@@ -66,7 +66,7 @@ function r(s)
 	if s == 🪙
 		return 10
 	elseif s == 💀
-		return -100
+		return -10
 	else
 		return -1
 	end
@@ -164,13 +164,13 @@ f(s, a)
 [f(10, :→) for _ in 1:20]
 
 # ╔═╡ ac71275d-18b4-4e8c-aa94-220f4a6f5bee
-@test f(5, :←) == 5
+@test f(1, :→) == 2
 
 # ╔═╡ 0251135a-5f62-4628-a640-52459007fc4e
-@test f(5, :↑) == 1
+@test f(2, :↓) == 6
 
 # ╔═╡ 9b5d9d5f-7840-4b1a-b7f0-6c6e2d33559b
-@test f(3, :→) == 4
+@test f(5, :←) == 5
 
 # ╔═╡ 7fb3f565-9005-4759-a0a6-10fb8fbec5b9
 @test f(9, :→) == 10
@@ -310,9 +310,6 @@ function Q_learn!(Q)
 	return rewards
 end
 
-# ╔═╡ def7620e-3170-4542-8098-22edfd4f91f4
-ϵ(1000)
-
 # ╔═╡ db10ce55-cf88-4caf-8b18-913be69687a1
 begin
 	episodes
@@ -327,12 +324,23 @@ if episodes < 100000
 		 label=nothing, 
 		 xlabel="Episode",
 		 ylabel="Reward",
-		 ylim=(-150, 15), 
+		 ylim=(-50, 15), 
 		 yticks=[-150, -100, -50, 0, 10],
 		 size=(400, 400))
 else
 	"too much to plot"
 end
+
+# ╔═╡ db5cfccc-600d-43cd-9273-44eb2abc0ab6
+@bind example_trace_button CounterButton("Example Trace")
+
+# ╔═╡ ca4a816e-6de6-4395-80ee-b2b332e56e43
+if example_trace_button > 0
+	Q_episode!(Q, episodes)
+end
+
+# ╔═╡ def7620e-3170-4542-8098-22edfd4f91f4
+ϵ(episodes)
 
 # ╔═╡ e5185211-21f8-4918-93b5-5e221baa7487
 V = [max([Q[s, a] for a in A]...) for s in S]
@@ -342,6 +350,8 @@ best_a(Q, s) = argmax(a -> Q[s, a], A)
 
 # ╔═╡ cf2299a3-6533-4f24-8e44-7d42fd51a2cb
 let
+	example_trace_button
+	
 	mm = Plots.Measures.mm
 	heatmap(V,
 		fontfamily="times",
@@ -386,7 +396,7 @@ Q[14, :→]
 0.5*0.25
 
 # ╔═╡ 6e0a220d-4ce6-4762-89c5-c7036b5e1624
-r(💀)*γ^2*0.5*0.25*0.5*0.25
+r(💀)*γ^2*(0.5*0.25)*(0.5*0.25)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1665,9 +1675,11 @@ version = "1.13.0+0"
 # ╠═1794648d-5d7c-4e9e-b402-6d7a352f3d32
 # ╟─3b4e1eec-f41f-4fe2-9332-f550f58b6cb3
 # ╠═7aa16fa3-4473-400d-9dac-278994fa2952
-# ╠═def7620e-3170-4542-8098-22edfd4f91f4
 # ╠═db10ce55-cf88-4caf-8b18-913be69687a1
 # ╠═b72996b7-0f3c-43ae-8141-1d907d26bb13
+# ╠═db5cfccc-600d-43cd-9273-44eb2abc0ab6
+# ╠═ca4a816e-6de6-4395-80ee-b2b332e56e43
+# ╠═def7620e-3170-4542-8098-22edfd4f91f4
 # ╠═e5185211-21f8-4918-93b5-5e221baa7487
 # ╠═1aacbba5-faf8-4c11-8637-5d5ca6548e9b
 # ╠═cf2299a3-6533-4f24-8e44-7d42fd51a2cb

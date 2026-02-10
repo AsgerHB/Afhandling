@@ -83,6 +83,8 @@
 // Cite Label (CL) shorthand to use mostly with dblp
 #let cl(label_string) = cite(label(label_string))
 
+#let comment(content) = [ #h(1fr) $triangle.r$ #content ]
+
 #let Act = $A c t$
 #let mdp = $cal(M)$
 #let powerset(x) = $scr(P)(#x)$
