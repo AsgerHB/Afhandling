@@ -51,25 +51,12 @@ begin
 	🧊 = Set([10, 11])
 	🤖 = 14
 	💀 = 15
-	🪙 = 16
+	🏁 = 16
 end;
 
 # ╔═╡ e7550ae3-5f15-4d47-af77-69ce441e30f5
 function is_terminal(s)
-	s == 🪙 || s == 💀
-end
-
-# ╔═╡ ad495597-474d-4a77-936e-200900182cf0
-# reward
-function r(s)
-	# Actually, moving to the terminal state also has a cost
-	if s == 🪙
-		return 10
-	elseif s == 💀
-		return -10
-	else
-		return -1
-	end
+	s == 🏁 || s == 💀
 end
 
 # ╔═╡ ecbe3620-f071-4ce4-a2c0-e6b7d201f509
@@ -110,8 +97,8 @@ let
 	x, y = indexof(💀)
 	annotate!(y - 0.50, x - 0.50, text("⁣💀", 30, "Fira sans"))
 
-	x, y = indexof(🪙)
-	annotate!(y - 0.50, x - 0.50, text("⁣🪙", 30, "Fira sans"))
+	x, y = indexof(🏁)
+	annotate!(y - 0.50, x - 0.50, text("⁣🏁", 30, "Fira sans"))
 
 	plot!()
 end
@@ -151,6 +138,19 @@ function f(s, a)
 	return S[x, y]
 end
 
+# ╔═╡ ad495597-474d-4a77-936e-200900182cf0
+# reward
+function r(s)
+	# Actually, moving to the terminal state also has a cost
+	if s == 🏁
+		return 10
+	elseif s == 💀
+		return -10
+	else
+		return -1
+	end
+end
+
 # ╔═╡ ddc96755-f381-48d6-83ce-41504bd6145e
 @bind a Select(A)
 
@@ -176,7 +176,7 @@ f(s, a)
 @test f(9, :→) == 10
 
 # ╔═╡ 0a1e6927-5e45-430c-848f-cdd68e4321f0
-@test f(12, :↓) == 🪙
+@test f(12, :↓) == 🏁
 
 # ╔═╡ a58cc125-a624-47e5-8a87-ded8bbdd1400
 @test f(1, :↑) == 1
@@ -350,7 +350,7 @@ best_a(Q, s) = argmax(a -> Q[s, a], A)
 
 # ╔═╡ cf2299a3-6533-4f24-8e44-7d42fd51a2cb
 let
-	example_trace_button
+	example_trace_button # This button updates the weights by one episode
 	
 	mm = Plots.Measures.mm
 	heatmap(V,
@@ -360,7 +360,7 @@ let
 		ylabel="y",
 		yflip=true,
 		ticks=nothing,
-		clim=(-3, 10),
+		clim=(-10, 1),
 		#title="heatmap of V and strategy π",
 		#title="$episodes episodes",
 		margin=2mm,
@@ -377,8 +377,8 @@ let
 	x, y = indexof(💀)
 	annotate!(y + 0.05, x - 0.30, text("⁣💀", 15, "Fira sans"))
 
-	x, y = indexof(🪙)
-	annotate!(y + 0.05, x - 0.30, text("⁣🪙", 15, "Fira sans"))
+	x, y = indexof(🏁)
+	annotate!(y + 0.05, x - 0.30, text("⁣🏁", 15, "Fira sans"))
 	
 	for x in 1:4, y in 1:4
 		annotate!(y - 0.30, x - 0.30, text(S[x, y], :crimson, 10))
@@ -1642,12 +1642,12 @@ version = "1.13.0+0"
 # ╠═e7550ae3-5f15-4d47-af77-69ce441e30f5
 # ╠═f89282bf-4a86-483c-b34c-cac30525ca8e
 # ╠═05e698fa-9cdd-4ef9-a2b3-be29e6d53eff
-# ╠═ad495597-474d-4a77-936e-200900182cf0
 # ╠═c05f019d-3b02-43d3-9a06-32f0e3edfb30
 # ╠═ecbe3620-f071-4ce4-a2c0-e6b7d201f509
 # ╠═449cb2aa-c097-4d65-89fe-abce707e0a82
 # ╠═18385c3f-8be1-4190-b831-2cfbffdd4760
 # ╠═e21084bc-480c-43b6-a714-49dd9465a98d
+# ╠═ad495597-474d-4a77-936e-200900182cf0
 # ╠═ddc96755-f381-48d6-83ce-41504bd6145e
 # ╠═3b4b72a6-e2cb-42fd-943e-1ecfe83007aa
 # ╠═cfae881c-5f82-440a-8eec-a91585093a47
