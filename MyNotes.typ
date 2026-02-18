@@ -13,17 +13,9 @@ I would do well to define these terms in the text and use them consistently.
 / Trace: Created from a controller and a model. 
 / Real-world outcome: Created from a controller acting upon a system.
 
-== Questions for my supervisors
-==== Kim
- 
- - Can we go through the PhD page with instructions for submitting the thesis? I want to know when I should be doing what.
- - Please have a look at my proposed structure and tell me what you think.
- - The terms pre- and post-shielding seem to have had two competing definitions. Please give me some feedback for my section on the matter.
- - When I discuss the origin of the term "shielding," should I cite both _On Time with Minimal Expected Cost_ and _UPPAAL STRATEGO,_ or just the latter?
-
-==== Christian
-
- - Please have a look at my proposed structure and tell me what you think.
-
+== Some feedback that I got on the 11th of February 
+The new Q-learning subsection was generally well-received, and Kim told me I will have done well if I write the rest of the thesis in the same style. 
+A lot of the feedback has been about me trying to be needlessly clever. I should generally not leave things implied, assume knowledge from the reader, or try to couch my language to allow for esoteric edge-cases. 
+It sounds like the introduction should almost be like a textbook, so stuff like initialization of Q-values should be included.
 
 #pagebreak()
