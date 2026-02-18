@@ -2,10 +2,6 @@
 
 #show: apply_style
 
-#set document(
-    title: "PhD Thesis",  // TODO: Change
-    author: "Astrid Horn Brorholt",
-)
 
 #include "Frontmatter/Title Page.typ"
 #pagebreak(weak: true)

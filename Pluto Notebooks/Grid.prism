@@ -1,0 +1,53 @@
+mdp
+
+const int M = 4;
+const int N = 4;
+
+const int S0 = 1;
+
+const int SKULL = 15;
+const int GOAL = 16;
+formula terminal = (s=SKULL | s=GOAL);
+
+formula ice  = (s=10 | s = 11);
+
+label "ice"  = ice;
+label "skull" = (s=SKULL);
+label "goal" = (s=GOAL);
+
+// Slippage probabilities on ice
+const double p_intended = 0.625;
+const double p_slip     = (1.0 - p_intended)/3.0; // each other direction
+
+  // row r in [0..M-1], col c in [0..N-1]
+formula r  = floor((s-1)/N);
+formula c  = s-(r*N)-1;
+
+formula move_left = (c=0     ? s : s-1);
+formula move_right = (c=N-1   ? s : s+1);
+formula move_up = (r=0     ? s : s-N);
+formula move_down = (r=M-1   ? s : s+N);
+
+module grid
+  // Single integer state, 1..M*N (row-major)
+  s : [1..M*N] init S0;
+
+  // ---- Non-ice, non-terminal: deterministic cardinal moves ----
+  [left]  (!terminal & !ice) -> 1:(s'=move_left);
+  [up]    (!terminal & !ice) -> 1:(s'=move_up);
+  [right] (!terminal & !ice) -> 1:(s'=move_right);
+  [down]  (!terminal & !ice) -> 1:(s'=move_down);
+
+  // ---- Ice tiles: slip dynamics ----
+  // Intended direction with p_intended, each other dir with p_slip
+  [left]  (!terminal & ice) -> p_intended:(s'=move_left) + p_slip:(s'=move_up) + p_slip:(s'=move_right) + p_slip: (s'=move_down);
+  [up]    (!terminal & ice) -> p_intended:(s'=move_up) + p_slip:(s'=move_left) + p_slip:(s'=move_right) + p_slip:(s'=move_down);
+  [right] (!terminal & ice) -> p_intended:(s'=move_right) + p_slip:(s'=move_up) + p_slip:(s'=move_left) + p_slip:(s'=move_down);
+  [down]  (!terminal & ice) -> p_intended:(s'=move_down) + p_slip:(s'=move_up) + p_slip:(s'=move_right) + p_slip:(s'=move_left);
+endmodule
+
+
+rewards "step_reward"
+!terminal : 1;
+(s=SKULL) : 10;
+endrewards
