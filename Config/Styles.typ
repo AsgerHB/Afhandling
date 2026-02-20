@@ -84,7 +84,7 @@
     v(0.5em)
   }
   show heading.where(level: 3): it => {
-    set text(size: 11pt)
+    set text(size: 12pt)
     it
   }
   show heading.where(level: 4): it => {
@@ -122,11 +122,13 @@
   )
   
   show thm-selector("thm-group", subgroup: "definition"): it => {
+    set par(hanging-indent: 0.5em, first-line-indent: 0.5em)
     it
     v(-1em) // I don't know how to do this properly :< 
   }
   
   show thm-selector("thm-group", subgroup: "proof"): it => {
+    set par(hanging-indent: 0.5em, first-line-indent: 0.5em)
     v(-1em) // Proofs should come right after a lemma or something, and be visually grouped with it.
     it
   }
