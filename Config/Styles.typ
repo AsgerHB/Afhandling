@@ -34,6 +34,13 @@
     font: "Gentium Book Plus",
     size: 10pt)
 
+
+  // Re-size emoji because at their default height they bump up the line-height wherever they appear.
+  show regex("\p{Emoji_Presentation}") : it => {
+    text(size: 0.8em, fill: peterriver)[#it]
+  }
+
+
   set par(leading: 0.54em, justify: true)  // Fiddled with it till it matched the other pdf.
 
   show raw: set text(font: "Fira Code", fill: cmyk(78%, 32%, 0%, 49%))
