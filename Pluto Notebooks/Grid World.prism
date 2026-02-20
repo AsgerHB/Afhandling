@@ -3,7 +3,7 @@ mdp
 const int M = 4;
 const int N = 4;
 
-const int S0 = 1;
+const int S0 = 14;
 
 const int SKULL = 15;
 const int GOAL = 16;
@@ -14,6 +14,7 @@ formula ice  = (s=10 | s = 11);
 label "ice"  = ice;
 label "skull" = (s=SKULL);
 label "goal" = (s=GOAL);
+label "terminal" = terminal;
 
 // Slippage probabilities on ice
 const double p_intended = 0.625;
@@ -44,10 +45,12 @@ module grid
   [up]    (!terminal & ice) -> p_intended:(s'=move_up) + p_slip:(s'=move_left) + p_slip:(s'=move_right) + p_slip:(s'=move_down);
   [right] (!terminal & ice) -> p_intended:(s'=move_right) + p_slip:(s'=move_up) + p_slip:(s'=move_left) + p_slip:(s'=move_down);
   [down]  (!terminal & ice) -> p_intended:(s'=move_down) + p_slip:(s'=move_up) + p_slip:(s'=move_right) + p_slip:(s'=move_left);
+
+  [ouch] s=SKULL -> 1:(s'=GOAL);
 endmodule
 
 
-rewards "step_reward"
-!terminal : 1;
-(s=SKULL) : 10;
+rewards
+  !terminal: 1;
+  (s=SKULL) : 50;
 endrewards
