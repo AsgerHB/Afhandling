@@ -16,7 +16,7 @@
   content((rel: (0, 0.6)),  [System])
   
     line((rel:(0.1, 0), to: "Shield.east"), "Agent",  stroke: (paint: emerald, thickness: 3pt), mark: (end:  (symbol: ">")))
-  content((rel: (-1.1, -0.4), to: "Agent.center"),  [Allwed \ actions])
+  content((rel: (-1.1, -0.4), to: "Agent.center"),  [Allowed \ actions])
     line((rel:(0.1, 0), to: "Agent.east"), "System",  stroke: (paint: emerald, thickness: 3pt), mark: (end:  (symbol: ">")))
   content((rel: ( 1.1, -0.4), to: "Agent.center"),  [Safe \ action])
 

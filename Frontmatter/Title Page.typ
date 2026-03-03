@@ -1,16 +1,15 @@
 #import "../Config/Styles.typ": apply_style
 #show: apply_style
 
-
 #set document(
-    title: "Scalable Shielding of Cyber-physical Systems", 
+    title: "Scalable Shielded Reinforcement Learning for Cyber-physical Systems", 
     author: "Astrid Horn Brorholt",
 )
 
 #context[#align(center)[
-  #text(size: 30pt, weight: "bold")[
-    Scalable Shielding of \
-    Cyber-physical Systems
+  #set par(justify: false)
+  #text(size: 28pt, weight: "bold")[
+    #document.title
   ]
 
   #text(size:14pt)[

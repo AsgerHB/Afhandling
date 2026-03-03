@@ -37,7 +37,7 @@ This performance is achieved by controllers that use a high number of neurons, m
 Reinforcement learning  #cl("I:DBLP:books/lib/SuttonB98") @I:kaelbling1996reinforcement @I:arulkumaran2017deep is a major class of machine learning techniques, separate from supervised and unsupervised learning @I:alloghani2020systematic.
 In supervised learning, models learn from labelled data, to predict the labels of unseen data.
 Unsupervised (or self-supervised) learning similarly trains the model on a set amount of unlabelled data, to discover relevant patterns and approximations.
-In contrast, reinforcement learning _agents_ are actively interacting with a system, directing exploration and receiving observation data and reward, as the system responds to actions taken by the agent.
+In contrast, reinforcement learning _agents_ are actively interacting with a system, directing exploration and receiving observation data and rewards, as the system responds to actions taken by the agent.
 
 The interaction between an agent and a system is illustrated in @fig:RL:
 The agent observes its current state, and makes a decision on which action to take.
@@ -60,7 +60,7 @@ An MDP can be described by a tuple $(S, s_0, Act, P, R)$ where
 In this definition, the state-space is assumed to be finite, though it would be straightforward to generalize to a countably infinite state-space. 
 If $S$ were instead to be uncountably infinite, the transition function $P$ should be modified to give a density function over a set of states, rather than giving probabilities for specific states. 
 I.e. 
-$P : S times Act -> (S -> RR_(>=0))$ such that $integral_(s' in S) P(s, a)(s') = 1 d s'$.
+$P : S times Act -> (S -> RR_(>=0))$ such that $integral_(s' in S) P(s, a)(s') d s' = 1$.
 
 The definition also requires every action $a in Act$ to be defined for every state in $S$. 
 This assumption about the model is made w.l.o.g. to simplify notation.
@@ -72,7 +72,7 @@ Policies can either be
  - _deterministic_ $S -> Act$, uniquely selecting one specific action for each state, 
  - or _nondeterministic_ $S -> powerset(Act)$, giving a subset $A subset.eq Act$ of possible actions. 
 
-Given an e.g. nondeterministic policy $pi : S -> powerset(Act)$, a trace $xi$ of an MDP is an interleaved series of states and actions $xi = s_0 a_0 s_1 a_1 s_2 a_2 ...$ such that $a_i in pi(s_i)$ and $P(s_i, a_i, s_(i+1)) > 0$.
+Given an e.g. nondeterministic policy $pi : S -> powerset(Act)$, a trace $xi$ is an outcome of an MDP $mdp$ and policy $pi$ is an interleaved series of states and actions $xi = s_0 a_0 s_1 a_1 s_2 a_2 ...$ such that $a_i in pi(s_i)$ and $P(s_i, a_i, s_(i+1)) > 0$.
 Traces are defined similarly for deterministic and probabilistic functions.
 Since @def:mdp does not include a stopping condition, traces will be infinite.
 A finite section of a trace $xi_m^n = s_m a_m ... a_(n-1) s_n$ contain the steps from state and action pairs from $s_m$ up to $s_n$.
@@ -82,10 +82,17 @@ For a finite trace, $xi_1^n = s_0 a_0 s_1 a_1 ... a_(n-1) s_n$ the (undiscounted
 This definition is less useful for infinite traces, as we will see in the following example:
 
 #example[
-  Consider an MDP with one state $s$ and two actions, $a$ and $b$.
-  Let $R(s, a, s)=1$, $ R(s, b, s) = 100$, and $P(s, a, s) = P(s, b, s) = 1$. This gives  $mdp= ({s}, s, {a, b}, P, R)$.
-  Let the policies $pi(s) = a$ and $pi'(s) = b$.
+  #grid(columns: 2, column-gutter: 3em,
+    [
+      #todo[Proper MDP to show the reader what it is.]
+      #todo[Dotted outcomes, add rewards and percentages.]
+      Consider an MDP with one state $s$ and two actions, $a$ and $b$.
+    Let $R(s, a, s)=1$, $ R(s, b, s) = 100$, and $P(s, a, s) = P(s, b, s) = 1$. 
+    This gives  $mdp= ({s}, s, {a, b}, P, R)$.],
+    include("../Graphics/Intro/Simple MDP.typ"),
+  )
 
+  Let the policies $pi(s) = a$ and $pi'(s) = b$.
   Is the policy $pi'$ more useful than $pi$? We see that 
   $ R(xi) &= lim_(n -> infinity) sum_(i=0)^n 1 && = infinity  = 
    R(xi') &= lim_(n -> infinity) sum_(i=0)^n 100 $
@@ -150,7 +157,7 @@ The algorithm has additional input parameters, which will be described in the fo
   pseudocode-list(numbered-title: [Q-learning])[
     - *Input:* MDP $mdp = (S, s_0, Act, P, R)$, 
       discount factor $gamma$,
-      initial $Q : S -> RR$,
+      initial $Q : S times Act -> RR$,
       number of episodes $n$,
       episode length $m$,
       learning rate $alpha : NN -> [0; 1[$,
@@ -285,7 +292,8 @@ In Q-learning, the training phase would be exactly as @alg:QLearning, while the 
 == Shielding <sec:Shielding>
 
 Consider again an MDP $mdp = (S, s_0, Act, P, R)$. Besides optimizing for maximum reward, there may be other requirements for a policy $pi$ to be useful in practice. 
-One such set of requirements are safety properties, stating that an event (or finite series of events) will never occur in the system.
+One such set of requirements are safety properties, stating that a state (or finite sequence of states) will never occur in the system.
+#todo[Give examples that are based on _states_ and definitely not time. E.g. state 11 is visited at most 3 times.]
 Examples could be statements like "orders are always processed within 10 minutes" or "all tests are taken before the sample is discarded," or in @ex:GridWorld: "The state 💀 is never reached."
 
 Opposite to safety properties are liveness properties, which state that an event will eventually occur in the system, without a time bound. This could be e.g. "orders are eventually fulfilled" or "the state 🏁 is eventually reached."
@@ -303,7 +311,7 @@ In the following, safety will be discussed in terms of invariants, given as a se
   For an MDP $mdp$ and a safe set $phi subset.eq S$, a state $s in S$ is safe if $s in phi$. 
   Furthermore, a trace $xi$ is safe (with regards to $phi$) if for every $s_i$ in $xi$, $s_i in phi$.
   This extends to sections of traces $xi_n^m$ in the natural way.
-  A policy $pi$ is safe wrt. $phi$ if every trace given $pi$ is safe.
+  A policy $pi$ is safe wrt. $phi$ if every trace that is an outcome of $pi$ is safe.
  
  Safety with regards to $phi$ is indicated with $models$, as respectively $s models phi$, $xi models phi$ and $pi models phi$.
 ]
@@ -313,11 +321,11 @@ Among the many approaches to enforcing safety in reinforcement learning, #citati
 Since shields work by restricting actions, it can be applied to any existing reinforcement learning method, including deep learning, allowing it to work in concert with state of the art methods to achieve safe and optimized behaviour.
 
 #definition(name: "Shield, maximally permissive shield, shielded policy")[
-  For an MDP $mdp$ and safe set $phi$, a shield is a nondeterministic policy $shield : S -> powerset(Act)$ such that every trace $xi$ produced by $shield$ is safe.
+  For an MDP $mdp$ and safe set $phi$, a shield is a nondeterministic policy $shield : S -> powerset(Act)$ such that every trace $xi$ that is an outcome of $shield$ is safe.
   
-  A shield $shield$ is maximally permissive if for all states $s in S$, there is no other shield $shield'$ such that $shield(s) subset shield'(s)$.
+  A shield $shield$ for a safe set $phi$, is maximally permissive if for all states $s in S$, there is no other shield $shield'$ for $phi$ such that $shield(s) subset shield'(s)$.
 
-  A deterministic policy $pi$ is shielded by $shield$ if $forall s in S : pi(s) in shield(s)$. Similarly for a nondeterministic policy if $forall s in S : pi(s) subset.eq shield(s)$. And for a probabilistic policy if $pi(s, a) > 0 => a in shield(s)$.
+  A deterministic policy $pi$ is shielded by $shield$ if $forall s in S : pi(s) in shield(s)$. Similarly for a nondeterministic policy $pi$ if $forall s in S : pi(s) subset.eq shield(s)$. And for a probabilistic policy $pi(s, a) > 0 => a in shield(s)$.
 ]<def:Shielding>
 
 The maximally permissive shield for an invariant of an MDP is unique @I:BernetJW02 @I:PaperB. 
@@ -348,7 +356,7 @@ The maximally permissive shield for an invariant of an MDP is unique @I:BernetJW
 Note that @def:Shielding requires safety over all infinite traces that are outcomes of the shield.
 This generally requires computing a safety strategy offline, which can be computationally infeasible for some models. 
 Instead, it can make sense to only give guarantees $k$ steps into the future, computed on-line at each step.
-These finite horizon shields are often referred to as bounded prescience  shields @I:giacobbe_shielding_2021, or $k$-step lookahead shields @I:xiao_model-based_2023 @I:yang_safe_2023.
+These finite horizon shields are often referred to as _bounded prescience_  shields @I:giacobbe_shielding_2021, or $k$-step lookahead shields @I:xiao_model-based_2023 @I:yang_safe_2023.
 
 One example of such a safety guarantee @I:giacobbe_shielding_2021  was given for a deterministic MDP, but here extended to include probabilistic outcomes: 
 For an MDP $mdp$, action $a_0$  is $k$-safe at state $s_0$, if there exists a deterministic strategy $pi$ such that for all traces $xi = s_0 a_0 ... s_k...$ with $pi(s_i) = a_i$ for $i > 0$, then $xi_0^k$ is safe.
@@ -358,13 +366,6 @@ This extends to other states $s$ by redefining the starting state of $mdp$ to $s
 
 #todo[Write this section]
 
-==== Obtaining a Model
-
-// Many formal verification tools assume that an accurate model of the system is available.
-// This model could be provided by a domain expert, but in other cases it might not be available.
-// When no models are available, some things like erm automata learning or uncertain MDPs might be useful. #citationneeded[] #cl("I:DBLP:conf/isola/TapplerPKMBL22")
-
-#todo[Write this section]
 
 === Applying the Shield
 
@@ -387,9 +388,11 @@ In the following, we shall use the terms pre- and post-shielding to mean the for
   label: <fig:PrePostShielding>
 )
 
+#todo[Describe the need (or lack thereof) of keeping the shield after learning.]
+
 ===== Pre-shielding
 Illustrated in @fig:PreShielding, this term refers to the shield restricting the behaviour of the the policy by providing a set of actions $A subset.eq Act$, that are permitted for the given state.
-The policy must be set up in such a way as to only pick an action $a$ if it is included in the set $A$.
+The learning must be set up in such a way as to only pick an action $a$ if it is included in the set $A$.
 
 For Q-learning this would require modifying @alg:QLearning to maximize only over safe actions $max_(a in shield(s))$, rather than all of $Act$.  For example, in @l:QUpdate:
 $ Q (s, a) = Q (s, a) + alpha (i) (R(s, a, s') + gamma max_(a' in shield(s')) Q (s', a') - Q (s, a)) $
@@ -405,7 +408,7 @@ In addition to a shield $shield$, post-shielding requires a probabilistic fallba
 
 The fallback policy $fehu$ has to remain static during learning, to preserve convergence guarantees. It could simply give a uniform distribution over safe actions, pick actions deterministically from an ordering, or according to a model-specific heuristic. It could also be a trained policy, as discussed in @post-shielding-optimization of Paper A.
 
-#infobox(name: "Value Updates in Post-shielding")[
+#remark(name: "Value Updates in Post-shielding")[
   The value updates for post-shielding are done in the natural way, but there is a risk of making subtle mistakes.
   Some care must be taken when updating e.g. the Q-values for a post-shielded MDP with an altered transition function $P'$.
   Say that in state $s$,  the shield alters an unsafe action $a in.not shield(s)$ to the safe alternative $fehu(s) = a'$, reaching state $s'$.
@@ -451,7 +454,7 @@ Otherwise, the shield will interfere with the policy, disrupting its optimized b
 Outside the context of RL, the term describes applying the shield as a guardrail of a controller that has been designed to be mostly safe, but without using the shield as reference.
 Thus, an existing controller can be upgraded to give formal safety guarantees by applying a post-hoc shield in cases where altering the controller itself would be costly.
 
-#infobox(name: "Terminology in Paper A")[
+#remark(name: "Terminology in Paper A")[
   Note that some terms used in Paper A @I:PaperA differ from the definitions in this section.
   What the paper calls _post-shielding,_ this section defines as _post-hoc shielding._ 
   Conversely, what it calls _pre-shielding_ is called _end-to-end shielding_  in this section.
