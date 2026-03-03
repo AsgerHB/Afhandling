@@ -13,8 +13,6 @@
   proof, definition, rules: thm-rules
 ) = default-theorems("thm-group", lang: "en", thm-numbering: thm-numbering-linear)
 
-#todo[Almost every section should have a "Related Work" or "State of the Art" subsection.]
-
 #[
   #set heading(numbering: none)
   = Introduction
@@ -33,7 +31,6 @@ This presumes an accurate model of the (cyber-physical) system under verificatio
 Neural networks are notable for having achieved impressive performance in a wide variety of tasks #citationneeded[alphago, atari games, muzero, chatgpt].
 This performance is achieved by controllers that use a high number of neurons, making direct formal verification infeasible.
 
-#todo[Mention the term multi-objective optimization and the trade-off between safety and efficiency.]
 
 == Reinforcement Learning
 
@@ -123,7 +120,7 @@ This is used in the definition of the optimization problem of finding the policy
 ]<def:Optimization>
 
 It may be possible to compute $pi^star$ directly, through e.g. value- or policy iteration. #citationneeded[]
-But these methods run into scalability issues on the size of the state-space $S$, and require full knowledge of the transition probabilities $P$ and rewards $R$. 
+#strike[But these methods run into scalability issues on the size of the state-space $S$], and require full knowledge of the transition probabilities $P$ and rewards $R$.
 #todo[It's not really scalability issues in the size of the state space. Rather, the issue is state-space explosion. Give more credit to these methods. Also, value iteration is another approximate method. It's linear programming that gives the true values.]
 If the state-space is prohibitively large, or the MDP is not fully known but can be sampled from, the optimal policy may instead be approximated through learning. 
 
@@ -294,7 +291,7 @@ Examples could be statements like "orders are always processed within 10 minutes
 Opposite to safety properties are liveness properties, which state that an event will eventually occur in the system, without a time bound. This could be e.g. "orders are eventually fulfilled" or "the state 🏁 is eventually reached."
 The focus in this thesis is on safety:
 
-Formally, a property is a safety property iff for every trace $xi = s_1 a_1 s_2 a_2 ...$ violates the property, there exists an $i in NN$ such that the finite sub-trace $xi_1^i = s_1 a_1 ... a_(i-1) s_i$ is enough to show the property is violated #cl("I:DBLP:reference/mc/ClarkeHV18").
+Formally, a property is a safety property iff for every trace $xi = s_1 a_1 s_2 a_2 ...$ that violates the property, there exists an $i in NN$ such that the finite sub-trace $xi_1^i = s_1 a_1 ... a_(i-1) s_i$ is enough to show the property is violated #cl("I:DBLP:reference/mc/ClarkeHV18").
 An important fragment of the safety properties is invariants, expressing that some proposition holds in every state.
 The safety property for @ex:GridWorld, $forall s_i : s_i != 💀$, is an invariant.
 These properties can be given as a set of states, $phi$, or as the LTL #cl("I:DBLP:reference/mc/ClarkeHV18") safety fragment "$#strong("G") psi$" where $psi$ is a predicate on $S$.
@@ -311,12 +308,12 @@ In the following, safety will be discussed in terms of invariants, given as a se
  Safety with regards to $phi$ is indicated with $models$, as respectively $s models phi$, $xi models phi$ and $pi models phi$.
 ]
 
-The optimization problem stated in @def:Optimization does not include a notion of safety, and it is not straightforward to define a reward function in such a way that the policy will converge to preserve a desired invariant.
+The optimization problem stated in @def:Optimization does not include a notion of safety, and it is not straightforward to define a reward function in such a way that the policy will converge to the desired safe behaviour.
 Among the many approaches to enforcing safety in reinforcement learning, #citationneeded[Citations from Paper A and Alshiekh18], shielding @I:AlshiekhBEKNT18 @I:BloemKKW15 is a promising technique which restricts the actions available to the agent to ensure safe behaviour.
 Since shields work by restricting actions, it can be applied to any existing reinforcement learning method, including deep learning, allowing it to work in concert with state of the art methods to achieve safe and optimized behaviour.
 
 #definition(name: "Shield, maximally permissive shield, shielded policy")[
-  For an MDP $mdp$ and safe set $phi$, a shield is a nondeterministic policy $shield : S -> powerset(Act)$ such that every trace $xi$ given $shield$ is safe.
+  For an MDP $mdp$ and safe set $phi$, a shield is a nondeterministic policy $shield : S -> powerset(Act)$ such that every trace $xi$ produced by $shield$ is safe.
   
   A shield $shield$ is maximally permissive if for all states $s in S$, there is no other shield $shield'$ such that $shield(s) subset shield'(s)$.
 
@@ -353,11 +350,9 @@ This generally requires computing a safety strategy offline, which can be comput
 Instead, it can make sense to only give guarantees $k$ steps into the future, computed on-line at each step.
 These finite horizon shields are often referred to as bounded prescience  shields @I:giacobbe_shielding_2021, or $k$-step lookahead shields @I:xiao_model-based_2023 @I:yang_safe_2023.
 
-One example of such a safety guarantee @I:giacobbe_shielding_2021 is defined as having the possibility of staying safe for $k$ steps into the future, after taking the next action.
-The definition was given for a deterministic MDP, but here extended to include probabilistic outcomes: 
+One example of such a safety guarantee @I:giacobbe_shielding_2021  was given for a deterministic MDP, but here extended to include probabilistic outcomes: 
 For an MDP $mdp$, action $a_0$  is $k$-safe at state $s_0$, if there exists a deterministic strategy $pi$ such that for all traces $xi = s_0 a_0 ... s_k...$ with $pi(s_i) = a_i$ for $i > 0$, then $xi_0^k$ is safe.
 This extends to other states $s$ by redefining the starting state of $mdp$ to $s$.
-
 
 ==== Probabilistic shielding
 
@@ -411,7 +406,8 @@ In addition to a shield $shield$, post-shielding requires a probabilistic fallba
 The fallback policy $fehu$ has to remain static during learning, to preserve convergence guarantees. It could simply give a uniform distribution over safe actions, pick actions deterministically from an ordering, or according to a model-specific heuristic. It could also be a trained policy, as discussed in @post-shielding-optimization of Paper A.
 
 #infobox(name: "Value Updates in Post-shielding")[
-  Some care must be taken e.g. when updating the Q-values for a post-shielded MDP with an altered transition function $P'$.
+  The value updates for post-shielding are done in the natural way, but there is a risk of making subtle mistakes.
+  Some care must be taken when updating e.g. the Q-values for a post-shielded MDP with an altered transition function $P'$.
   Say that in state $s$,  the shield alters an unsafe action $a in.not shield(s)$ to the safe alternative $fehu(s) = a'$, reaching state $s'$.
   The update should be performed for $a$ and not $a'$, i.e. updating $Q(s, a)$ with reward $R(s, a, s')$ as in @alg:QLearning, @l:QUpdate.
 
