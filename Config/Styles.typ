@@ -59,6 +59,8 @@
 
 
   // Headings
+  show heading.where(level: 5): set heading(numbering: none)
+  show heading.where(level: 6): set heading(numbering: none)
   let myNumbering(..numbers) = {
     let len = numbers.pos().len()
     if (len == 1) {
@@ -117,20 +119,34 @@
   show thm-selector("thm-group", subgroup: "example"): it => block(
     it,
     breakable: true,
-    stroke: 0.5pt,
-    inset: 1em
+    stroke: (0.5pt),
+    inset: 0.5em
+  )
+  show thm-selector("thm-group", subgroup: "remark"): it => block(
+    it,
+    breakable: true,
+    stroke: (left:1pt),
+    inset: 0.5em
   )
   
   show thm-selector("thm-group", subgroup: "definition"): it => {
-    set par(hanging-indent: 0.5em, first-line-indent: 0.5em)
-    it
     v(-1em) // I don't know how to do this properly :< 
+    block(it, inset: (left: 1em, right: 1em))
+  }
+  
+  show thm-selector("thm-group", subgroup: "theorem"): it => {
+    v(-1em)
+    block(it, inset: (left: 1em, right: 1em))
+  }
+  
+  show thm-selector("thm-group", subgroup: "lemma"): it => {
+    v(-1em)
+    block(it, inset: (left: 1em, right: 1em))
   }
   
   show thm-selector("thm-group", subgroup: "proof"): it => {
-    set par(hanging-indent: 0.5em, first-line-indent: 0.5em)
-    v(-1em) // Proofs should come right after a lemma or something, and be visually grouped with it.
-    it
+    v(-1em)
+    block(it, inset: (left: 1em, right: 1em))
   }
 
 
