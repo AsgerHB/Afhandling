@@ -418,41 +418,39 @@ next-state probability density function of $M_(H M)$ is given by the
 state density after a delay of $P$ (the period) according to $H$ with
 initial state density $N$.
 
+#example(name: "Hitting the bouncing ball")[
+  @fig:HBB shows an HMDP extending the SHS of
+  the bouncing ball from @fig:BBBehaviour. Now a player
+  has to keep the ball bouncing indefinitely by periodically choosing
+  between the actions #emph[hit] and #emph[nohit],
 
-==== Example <ex:hitting> (Hitting the bouncing ball).
-<example-hitting-the-bouncing-ball.>
-@fig:HBB shows an HMDP extending the SHS of
-the bouncing ball from @fig:BBBehaviour. Now a player
-has to keep the ball bouncing indefinitely by periodically choosing
-between the actions #emph[hit] and #emph[nohit],
+  #figure([#image("../Graphics/AISOLA23/HBB.png", width: 60%)], caption: [An HMDP for hitting a bouncing ball.]) <fig:HBB>
 
-#figure([#image("../Graphics/AISOLA23/HBB.png", width: 60%)], caption: [An HMDP for hitting a bouncing ball.]) <fig:HBB>
+  (three solid transitions). The period $P eq 0.1$ is modeled by a clock
+  $x$ with suitable invariant, guards and updates. The top transition
+  triggered by the #emph[nohit] action has no effect on the state (but
+  will have no cost). The #emph[hit] action affects the state only if the
+  height of the ball is at least 4m ($p gt.eq 4$). The left transition
+  applies if the ball is falling with a speed not greater than
+  $minus 4$m/s ($v gt.eq minus 4$) and accelerates to a velocity of
+  $minus 4$m/s. The right transition applies if the ball is rising, and
+  sets the velocity to a random value in
+  $lr([minus v minus 4 comma minus 0.9 v minus 4])$. The bottom dashed
+  transition represents the bounce of the ball as in
+  @fig:BBBehaviour, which is part of the environment
+  and outside the control of the agent.
 
-(three solid transitions). The period $P eq 0.1$ is modeled by a clock
-$x$ with suitable invariant, guards and updates. The top transition
-triggered by the #emph[nohit] action has no effect on the state (but
-will have no cost). The #emph[hit] action affects the state only if the
-height of the ball is at least 4m ($p gt.eq 4$). The left transition
-applies if the ball is falling with a speed not greater than
-$minus 4$m/s ($v gt.eq minus 4$) and accelerates to a velocity of
-$minus 4$m/s. The right transition applies if the ball is rising, and
-sets the velocity to a random value in
-$lr([minus v minus 4 comma minus 0.9 v minus 4])$. The bottom dashed
-transition represents the bounce of the ball as in
-@fig:BBBehaviour, which is part of the environment
-and outside the control of the agent.
-
-A time-extended state $lr((p comma v comma t))$ is in the goal set $G$
-if either $t gt.eq 120$ or $lr((p lt.eq 0.01 and lr(|v|) lt.eq 1))$ (the
-ball is deemed dead). The cost ($C$) is 1 for the #emph[hit] action and
-0 for the #emph[nohit] action, with an additional penalty of
-$1 comma 000$ for transitions leading to a dead state.
-@fig:UnshieldedTrace illustrates the near-optimal
-strategy $sigma^ast.basic$ obtained by the RL method implemented in
-#smallcaps[Uppaal Stratego] and the prefix of a random run. The expected
-number of #emph[hit] actions of $sigma^ast.basic$ within 120s is
-approximately $48$.$lt.tri$
-
+  A time-extended state $lr((p comma v comma t))$ is in the goal set $G$
+  if either $t gt.eq 120$ or $lr((p lt.eq 0.01 and lr(|v|) lt.eq 1))$ (the
+  ball is deemed dead). The cost ($C$) is 1 for the #emph[hit] action and
+  0 for the #emph[nohit] action, with an additional penalty of
+  $1 comma 000$ for transitions leading to a dead state.
+  @fig:UnshieldedTrace illustrates the near-optimal
+  strategy $sigma^ast.basic$ obtained by the RL method implemented in
+  #smallcaps[Uppaal Stratego] and the prefix of a random run. The expected
+  number of #emph[hit] actions of $sigma^ast.basic$ within 120s is
+  approximately $48$.$lt.tri$
+]<ex:hitting>
 
 #subpar.grid(
   [

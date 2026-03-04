@@ -59,6 +59,7 @@
 
 
   // Headings
+  show heading.where(level: 4): set heading(numbering: none)
   show heading.where(level: 5): set heading(numbering: none)
   show heading.where(level: 6): set heading(numbering: none)
   let myNumbering(..numbers) = {
