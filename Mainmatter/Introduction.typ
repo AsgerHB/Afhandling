@@ -81,22 +81,30 @@ Other types of model may produce finite traces, if they have a stopping criterio
 For a finite trace, $xi_1^n = s_0 a_0 s_1 a_1 ... a_(n-1) s_n$ the (undiscounted) reward can be defined as $R(xi) = sum_(i=0)^(n - 1) R(s_i, a_i, s_(i+1))$.
 This definition is less useful for infinite traces, as we will see in the following example:
 
-#example[
-  #grid(columns: 2, column-gutter: 3em,
-    [
-      #todo[Proper MDP to show the reader what it is.]
-      #todo[Dotted outcomes, add rewards and percentages.]
-      Consider an MDP with one state $s$ and two actions, $a$ and $b$.
-    Let $R(s, a, s)=1$, $ R(s, b, s) = 100$, and $P(s, a, s) = P(s, b, s) = 1$. 
-    This gives  $mdp= ({s}, s, {a, b}, P, R)$.],
-    include("../Graphics/Intro/Simple MDP.typ"),
-  )
+#example(name: "Injection Moulding")[
+  A factory has an indefinite contract to produce injection moulded components for a fixed price per unit.
+  Every cycle, the factory can choose to produce a batch of 100 units (abbreviated to the action $p$) or clean the mould and then produce a single unit (action $c$).
+  The mould has 2 states: clean ($○$) and contaminated ($◍$). 
+  
+  When producing a batch in a clean mould, there is a $5%$ risk of contamination.
+  A contaminated mould may compromise quality, but as stipulated by the contract this does not factor in to the price paid per unit.
 
-  Let the policies $pi(s) = a$ and $pi'(s) = b$.
-  Is the policy $pi'$ more useful than $pi$? We see that 
-  $ R(xi) &= lim_(n -> infinity) sum_(i=0)^n 1 && = infinity  = 
-   R(xi') &= lim_(n -> infinity) sum_(i=0)^n 100 $
-]<ex:undiscounted>
+  #figure(image("../Graphics/Intro/Factory.png", width: 120pt),
+    caption: [MDP representing an injection moulding process.]
+  )<fig:InjectionMoulding>
+  
+  The MDP $cal(I) = (S, s_0, Act, P, R)$ modelling this system is shown in @fig:InjectionMoulding.
+  It has state space $S = { ○, ◍ }$ with initial state $s_0 = ○$, and actions $Act = { p, c }$. 
+
+  The transition function is given as $ P(○, p, ○) = 0.95, P(○, p, ◍) = 0.05$ and deterministically $1.00 = P(◍, p, ◍) = & P(○, c, ○) = P(◍, c, ○) $. 
+  For all $s, s' in S$ the reward is $R(s, p, s') = 100$ and $R(s, c, s') = 1$.
+
+  Imagine one policy that cleans the moulds after each unit produced, and another policy that always produces a batch of units without concern for quality. 
+  These policies are $pi(s) = p$ and $pi'(s) = c$ for either $s in S$.
+  Is the policy $pi'$ more profitable than $pi$? We see that 
+  $ lim_(n -> infinity) sum_(i=0)^n 1 && = infinity  = 
+   lim_(n -> infinity) sum_(i=0)^n 100 $
+]<ex:InjectionMoulding>
 
 To measure the relative usefulness of strategies over an infinite horizon, a  discount factor $gamma in ]0; 1]$ is applied to the reward, giving preference to more immediate gains.
 This _discounted_ reward is defined as $R_gamma (xi) = sum_(i=0)^infinity gamma^i R(s_i)$. 
@@ -104,10 +112,10 @@ Note that in the special case where $gamma = 1$, $R_1$ is the same as the undisc
 The discount factor $gamma$ may be interpreted as the probability of the trace continuing, while with probability $1 - gamma$ the trace may end in the next step, losing access to future rewards.
 
 #example[
-  With $mdp, pi$ and $pi'$ as in @ex:undiscounted, a discounted reward can be used to compare them.
+  With $mdp, pi$ and $pi'$ as in @ex:InjectionMoulding, a discounted reward can be used to compare them.
   For example, $gamma = 0.99$ gives the geometric series
-  $ R_0.99(xi) & = lim_(n -> infinity) sum_(i=0)^n 0.99^i 1 && = 1/(1-0.99) = 100  "and" \
-  R_0.99(xi') & = lim_(n -> infinity) sum_(i=0)^n 0.99^i 100 && = 100/(1-0.99) = 10000 $
+  $ & lim_(n -> infinity) sum_(i=0)^n 0.99^i times 1 && = 1/(1-0.99) = 100  "and" \
+     & lim_(n -> infinity) sum_(i=0)^n 0.99^i times 100 && = 100/(1-0.99) = 10000 $
 ]<ex:discounted>
 
 In contrast to the reward gained from just one trace, the expected discounted reward for a probabilistic policy is defined as:
@@ -291,20 +299,21 @@ In Q-learning, the training phase would be exactly as @alg:QLearning, while the 
 
 == Shielding <sec:Shielding>
 
-Consider again an MDP $mdp = (S, s_0, Act, P, R)$. Besides optimizing for maximum reward, there may be other requirements for a policy $pi$ to be useful in practice. 
+Complex physical systems may have multiple requirements placed upon them, which cannot always be combined into a single reward signal.
+These requirements system may be in tension with each other, and it could be that some concerns should always come first, such as the safety of people or equipment. 
 
 === Safety
 
-One such set of requirements are safety properties, stating that a state (or finite sequence of states) will never occur in the system.
-#todo[Give examples that are based on _states_ and definitely not time. E.g. state 11 is visited at most 3 times.]
-Examples could be statements like "orders are always processed within 10 minutes" or "all tests are taken before the sample is discarded," or in @ex:GridWorld: "The state 💀 is never reached."
+Safety properties are a subset of properties on a system, that say a state (or finite sequence of states) will never be reached.
+For @ex:InjectionMoulding, the safety property could be "the mould is cleaned as soon as it becomes contaminated," i.e. the state $◍$  is always followed by $○$. (See @ex:QualityInjectionMoulding)
+A safety property for @ex:GridWorld could be "the state 💀 is never reached." (See @ex:GridWorldSafety.)
 
 Opposite to safety properties are liveness properties, which state that an event will eventually occur in the system, without a time bound. This could be e.g. "orders are eventually fulfilled" or "the state 🏁 is eventually reached."
 The focus in this thesis is on safety:
 
-Formally, a property is a safety property iff for every trace $xi = s_1 a_1 s_2 a_2 ...$ that violates the property, there exists an $i in NN$ such that the finite sub-trace $xi_1^i = s_1 a_1 ... a_(i-1) s_i$ is enough to show the property is violated #cl("I:DBLP:reference/mc/ClarkeHV18").
+Consider again an MDP $mdp = (S, s_0, Act, P, R)$. Formally, a property is a safety property iff for every trace $xi = s_0 a_0 s_1 a_1 ...$ that violates the property, there exists an $i in NN$ such that the finite sub-trace $xi_0^i = s_0 a_0 ... a_(i-1) s_i$ is enough to show the property is violated #cl("I:DBLP:reference/mc/ClarkeHV18").
 An important fragment of the safety properties is invariants, expressing that some proposition holds in every state.
-The safety property for @ex:GridWorld, $forall s_i : s_i != 💀$, is an invariant.
+The safety property $forall s_i : s_i != 💀$, is an invariant.
 These properties can be given as a set of states, $phi$, or as the LTL #cl("I:DBLP:reference/mc/ClarkeHV18") safety fragment "$#strong("G") psi$" where $psi$ is a predicate on $S$.
 
 A safety property can be re-formulated as an invariant by modifying the MDP, so it includes a "monitor" that will move the model to a sink state if the property is violated. 
@@ -335,6 +344,20 @@ Since shields work by restricting actions, it can be applied to any existing rei
 ]<def:Shielding>
 
 The maximally permissive shield for an invariant of an MDP is unique @I:BernetJW02 @I:PaperB. 
+
+#example(name: "Quality standards for injection moulding")[
+  Due to concerns over quality, the contract from @ex:InjectionMoulding is re-negotiated to require that the mould is immediately cleaned once it becomes contaminated. 
+
+  Recall the MDP $cal(I) = ({○, ◍},○, { p, c }, P, R)$ shown in @fig:InjectionMoulding. This new requirement in the contract corresponds to the safety property "all traces $xi = s_0, a_0, s_1, a_1$ satisfy that for every $s_i$ in $xi$, $s_i = ◍  => s_(i+1) = ○$."
+
+  This safety property can be made into an invariant $phi = {○, ◍}$ by an additional state $●$ that is reached when a batch is produced in a contaminated mould, as shown in @fig:QualityInjectionMoulding. 
+
+  #figure(image("../Graphics/Intro/FactorySink.png", width: 200pt),
+    caption: [MDP representing an injection moulding process.]
+  )<fig:QualityInjectionMoulding>
+
+  The maximally permissive shield which enforces the invariant $phi$ is  respectively $shield(○) = {p, c}$, $shield(◍) = {c}$ and $shield(●) = emptyset$.
+] <ex:QualityInjectionMoulding>
 
 === Origin of the Term
 
