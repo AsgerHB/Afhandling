@@ -240,7 +240,7 @@ This is ensured by the fact that $s_0$ is visited infinitely often as $n -> infi
    - $R(s, a, 15) = -50$ for $s != 15$. (💀)
    - $R(s, a, s') = -1$ otherwise.
   
-  Consider a discount factor of  $gamma = 0.9$, episode length $m=100$, learning rate, and exploration factor $alpha(i) = epsilon(i) = cases(0.1 "if" i < n/2, 0.1/(1 + 0.01*(t - i/2)))$.
+  Consider a discount factor of  $gamma = 0.9$, episode length $m=100$, initial $Q(s) = 0$ for all $s in S$, and learning rate and exploration factor \ $alpha(i) = epsilon(i) = cases(0.1 "if" i < n/2, 0.1/(1 + 0.01*(t - i/2)))$.
 
   Outcomes of Q-learning in Grid World $cal(G)$ with these parameters are shown in @fig:gridQ. The graph in @fig:QGraph100 shows the sum of rewards collected in each episode, up to $n=100$.
   The resulting policy is visualized in @fig:VTable100, which shows for every state $s$, the policy's action $a = argmax_a' Q(s, a')$, and the value $Q(s, a)$.
@@ -350,7 +350,8 @@ The maximally permissive shield for an invariant of an MDP is unique @I:BernetJW
 
   Recall the MDP $cal(I) = ({○, ◍},○, { p, c }, P, R)$ shown in @fig:InjectionMoulding. This new requirement in the contract corresponds to the safety property "all traces $xi = s_0, a_0, s_1, a_1$ satisfy that for every $s_i$ in $xi$, $s_i = ◍  => s_(i+1) = ○$."
 
-  This safety property can be made into an invariant $phi = {○, ◍}$ by an additional state $●$ that is reached when a batch is produced in a contaminated mould, as shown in @fig:QualityInjectionMoulding. 
+  This safety property can be turned into an invariant, by extending the state-space to $S={○, ◍, ●}$ with the safe set $phi = {○, ◍}$.
+  The state $●$ is reached when a batch is produced in a contaminated mould, as shown in @fig:QualityInjectionMoulding. 
 
   #figure(image("../Graphics/Intro/FactorySink.png", width: 200pt),
     caption: [MDP representing an injection moulding process.]
@@ -378,34 +379,33 @@ Such an abstraction could be significantly simpler than the full system, allowin
 
 Since this first article covering shielded reinforcement learning in finite MDPs, other shielding methods building upon the same framework have been described in the literature #citationneeded[Every shielded RL article I have on hand].
 
-#example(name: "Safety in Grid World")[
-  Recall the MDP $cal(G)=(S, s_0, Act, P, R)$ from @ex:GridWorld.
-  Let the safe set be $phi=S \\ {💀}$. 
-  What is the most permissive shield for $cal(G)$?
-  Certainly, taking → in state 14 is prohibited.
-  Next, any action in state 11 carries a risk of slipping and ending up in  💀, so state 11 should never be entered.
-  Lastly, any action in state 10 can cause the agent to slip onto state 11, so this state should be avoided as well. 
-  
-  @fig:GridWorldShield shows the resulting maximally permissive safe strategy for @ex:GridWorld. 
-  This strategy was generated using a publicly available package#footnote(link("https://github.com/AstridHornBrorholt/GridShielding.jl")) which implements the method described in Paper A (to be discussed in later sections).
-
-  #figure(image("../Graphics/Intro/Shielded.png", width: 40%),
-    caption: [Most permissive shield for Grid World. A shield icon 🛡️ indicates the action is not permitted.]
-  )<fig:GridWorldShield>
-
-]<ex:GridWorldSafety>
 
 
+=== Shielding a Policy <sec:ApplyingTheShield>
 
-=== Shielding a Policy
-
-How a policy is shielded can vary depending on the model and the application.
-The terms pre-shielding and post-shielding have been used in the literature to describe a shield's relationship with the policy, but with two distinct sets of meaning:
+Specific implementation details of how a shield is applied to a reinforcement learning agent can vary.
+The terms _pre-shielding_ and _post-shielding_ have been used to describe the relationship between the agent and the shield, but the terms have been used in the literature to describe two distinct concepts:
 
  + In one part of the literature, pre- and post-shielding refer to *how* the shield ensures only safe actions reach environment #cl("I:DBLP:journals/corr/abs-1708-08611") #cl("I:DBLP:journals/cacm/KonighoferBJJP25") @I:MedicalShielding #cl("I:DBLP:conf/isola/TapplerPKMBL22") @I:bloem_its_2020.
- + Alternatively the terms can refer to *when* a shield is applied, in the process of obtaining a policy @I:jakobs_thesis @I:PaperA.
+ + Alternatively the terms can refer to *when* a shield is applied, i.e. whether the shield is in place during training @I:jakobs_thesis @I:PaperA.
 
-In the following, we shall use the terms pre- and post-shielding to mean the former, while we dub the latter meaning resp. end-to-end shielding and post-hoc shielding.
+This section will coin an additional set of terms, to disambiguate these meanings.
+The terms _pre-_ and _post-shielding_ shall refer to the first and more widely used definition, i.e. *how* the shield is integrated into the reinforcement learning loop.
+The second set of terms which describe *when* the shield is in place, will be re-named in this section to _end-to-end shielding_ and _post-hoc shielding._
+
+#figure(table(columns: 2,
+    table.header( [*@sec:ApplyingTheShield*], [*Paper A*] ),
+     [End-to-end shielding], [Pre-shielding],
+     table.hline(),
+     [Post-hoc shielding], [Post-shielding],
+  ),
+  caption: [This section uses different terms compared to Paper A, \ to refer to the same concepts.]
+)<tab:NamingDiscrepancy>
+
+Note that the second definition is used in Paper A, and thus the terms in this section clash with that paper.
+The naming for this section was chosen to preserve the more widely-used meaning of pre- and post-shielding.
+As illustrated in @tab:NamingDiscrepancy, what Paper A calls pre-shielding is here referred to as end-to-end shielding, and what is called post-shielding is called post-hoc shielding in this section.
+
 
 #subpar.grid(columns: 2,
   [#figure(include("../Graphics/Intro/Pre-shielding.typ"),
@@ -428,23 +428,33 @@ In the following, we shall use the terms pre- and post-shielding to mean the for
   label: <when_shielding>
 )
 
-#todo[Describe the need (or lack thereof) of keeping the shield after learning.]
-
 ==== Pre-shielding
 Illustrated in @fig:PreShielding, this term refers to the shield restricting the behaviour of the the policy by providing a set of actions $A subset.eq Act$, that are permitted for the given state.
 The learning must be set up in such a way as to only pick an action $a$ if it is included in the set $A$.
 
-For Q-learning this would require modifying @alg:QLearning to maximize only over safe actions $max_(a in shield(s))$, rather than all of $Act$.  For example, in @l:QUpdate:
+For Q-learning, this can be implemented by modifying @alg:QLearning to maximize only over safe actions $max_(a in shield(s))$, rather than all of $Act$.  For example, in @l:QUpdate:
+
 $ Q (s, a) = Q (s, a) + alpha (i) (R(s, a, s') + gamma max_(a' in shield(s')) Q (s', a') - Q (s, a)) $
+
 A similar approach works for gradient methods @I:arulkumaran2017deep #cl("I:DBLP:journals/corr/abs-2006-14171").
 
+Excluding unsafe actions from consideration in the $max$ terms of Q-learning can be achieved by simply initializing the Q-values as $Q(s, a) = cases(-infinity " if " a in.not shield(s), q_0)$, for some default value $q_0$, e.g. $q_0 = 0$.
+Directly applying the shield to the Q-table is possible because the learning method works on a finite number of states.
+A similar approach is not possible for e.g. decision trees, or continuous methods such as Deep Q-learning, PPO, etc. where every state in the system is not explicitly represented. 
 
 ==== Post-shielding
 Contrary to pre-shielding, this configuration is transparent to the reinforcement learning algorithm.
-As shown in @fig:PostShielding, the algorithm's actions are sent to the shield, which passes it on to the environment.
+As shown in @fig:PostShielding, the algorithm's actions are sent to the shield. 
+If the action is safe, the shield passes it on to the environment unaltered.
+Otherwise an alternative, safe, action is chosen.
 
 This is akin to modifying the the MDP $mdp = (S, s_0, Act, P, R)$ with a new transition function.
-In addition to a shield $shield$, post-shielding requires a probabilistic fallback policy $fehu$, with $fehu(s, a) > 0 <=> a in shield(s)$. The shielded transition function used in place of $P$ in $mdp$, is $P'(s, a, s') = cases(P(s, a, s') "if" a in shield(s), P(s, fehu(s), s'))$.
+In addition to a shield $shield$, post-shielding requires a probabilistic fallback policy $fehu$, with $fehu(s, a) > 0 <=> a in shield(s)$. The shielded transition function used in place of $P$ in $mdp$, is 
+
+$ P'(s, a, s') = cases(
+  P(s, a, s') & " if " a in shield(s), 
+  product_(a in Act) fehu(s, a) P(s, a, s')
+) $
 
 The fallback policy $fehu$ has to remain static during learning, to preserve convergence guarantees. It could simply give a uniform distribution over safe actions, pick actions deterministically from an ordering, or according to a model-specific heuristic. It could also be a trained policy, as discussed in @post-shielding-optimization of Paper A.
 
@@ -489,6 +499,29 @@ Thus, an existing controller can be upgraded to give formal safety guarantees by
   What the paper calls _post-shielding,_ this section defines as _post-hoc shielding._ 
   Conversely, what it calls _pre-shielding_ is called _end-to-end shielding_  in this section.
 ]
+
+
+
+#example(name: "Safety in Grid World")[
+  Recall the MDP $cal(G)=(S, s_0, Act, P, R)$ from @ex:GridWorld.
+  Let the safe set be $phi=S \\ {💀}$. 
+  What is the most permissive shield for $cal(G)$?
+  Certainly, taking → in state 14 is prohibited.
+  Next, any action in state 11 carries a risk of slipping and ending up in  💀, so state 11 should never be entered.
+  Lastly, any action in state 10 can cause the agent to slip onto state 11, so this state should be avoided as well. 
+  
+  @fig:GridWorldShield shows the resulting maximally permissive safe strategy for @ex:GridWorld. 
+  This strategy was generated using a publicly available package#footnote(link("https://github.com/AstridHornBrorholt/GridShielding.jl")) which implements the method described in Paper A (to be discussed in later sections).
+
+  #figure(image("../Graphics/Intro/Shielded.png", width: 40%),
+    caption: [Most permissive shield for Grid World. A shield icon 🛡️ indicates the action is not permitted.]
+  )<fig:GridWorldShield>
+
+  This can be applied as a post-shield by initializing the Q-values as $Q(s) = cases(-infinity " if " |shield(s)| = 0, 0  )$.
+  The result of end-to-end post-shielding of the Grid World example is shown in ....
+  #todo[Code this up]
+
+]<ex:GridWorldSafety>
 
 === Finite- and Infinite-horizon Shielding
 
