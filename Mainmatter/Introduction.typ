@@ -770,7 +770,8 @@ Instead, they can be specified using LTL #cl("DBLP:reference/mc/PitermanP18")#cl
 As noted previously, LTL safety properties can be expressed as safe sets (invariants) by modifying the model $mdp$.
 This section continues to focus on safe sets $φ $.
 
-
+\
+#updated[
 #definition(name: "Probability of safety violation")[
   Let $mdp = (S, s_0, A, P, R)$ be an MDP, $phi$ a safe set, $pi$ a deterministic policy, and $s in S$ a state.
   The probability of leaving $phi$ starting from $s$ is written $PP_mdp^φ (pi, s)$. 
@@ -783,7 +784,9 @@ This section continues to focus on safe sets $φ $.
   $
 
   For a state $s$, action $a$, and subsequent policy $pi$, the probability of leaving~$phi$ after taking action $a$ is $PP_mdp^φ (pi, s, a) =  sum_(s' in S) P(s, a)(s') PP_mdp^φ (pi, s')$.
-]<def:BoundedProbabilisticSafety>
+]<def:ProbabilisticSafety>
+
+] // end updated
 
 For a safe set $phi$, the probabilistic guarantees can vary greatly.
 Two such guarantees will be given here, dubbed respectively _safe_ and _recoverable_ shields.
@@ -830,9 +833,12 @@ Any $θ$-safe action in $s_0$ is also $θ$-recoverable.
 However, this is not true for any $s in S$, since a $θ$-safe shield may allow irrecoverable actions in states that are unreachable, or reachable with low probability.
 ]
 
+#updated[
+
 Since $θ$-recoverable shields only bound the risk taken at each step, the probability of safety violation compounds to $1.0$ over an infinite horizon.
 #footnote[The worst-case risk of a policy $pi$ permitted by $hatshield_θ$ leaving $φ$ in $k$ steps is $1 - (1 - θ)^k$. This assumes that the initial state has at least one $θ$-safe action.]
 This is illustrated in the following example.
+
 
 #example(name: ["I can quit whenever I want"])[
   A smoker's lungs is modelled as the MDP $cal(L) = (S, s_0, A, R, P)$ with $S={lung, lungexplode}, s_0=lung, A={smoke, stop}$, and $P$ as shown in @fig:Smoker. State $lungexplode$ is terminal with $P(lungexplode, a)(lungexplode) = 1$ for $a in A$.
@@ -855,6 +861,7 @@ This is illustrated in the following example.
   The shield $hatshield_0.5$ therefore permits the policy $pi_smoke (s) = smoke$, which will almost surely reach $lungexplode$, i.e.~$PP^phi_cal(L) (pi_smoke, lung) = 1$.
 ]<ex:Smoker>
 
+] // end updated
 
 #todo[is#cl("DBLP:conf/tacas/Junges0DTK16") actually θ-safety? ]
 Synthesis methods for $theta$-safe shields #cl("DBLP:conf/tacas/Junges0DTK16")#cl("DBLP:journals/corr/DragerFK0U15") can also be computationally expensive, and will be more conservative than approaches focusing on recoverability #cl("DBLP:conf/concur/0001KJSB20")#cl("DBLP:journals/corr/abs-2605-10293")#cl("DBLP:conf/atva/PrangerKPB21")#cl("DBLP:conf/tacas/Junges0DTK16").
