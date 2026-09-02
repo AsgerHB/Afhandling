@@ -65,6 +65,19 @@
 
   set table.hline(stroke: 0.5pt)
 
+  // Contributions
+  show figure.where(kind: "contribution"): it => block(
+  fill: aaulysblå.lighten(96%),
+  stroke: (left: 4pt + aaublå),
+  inset: 12pt,
+  width: 100%,
+  align(left)[
+    #text(fill: aaublå)[*#it.supplement #it.counter.display(it.numbering)*]
+    #h(.4em)
+    #it.body
+  ],
+)
+
 
   // Headings
   show heading.where(level: 4): set heading(numbering: none)

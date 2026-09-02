@@ -595,7 +595,10 @@ $ R^shield_fehu (s, a, s') = cases(
 
 The fallback policy $fehu$ could pick actions from an ordering, choose according to a model-specific heuristic, or always select a universally safe action, if one exists.
 A probabilistic fallback function may pick among safe actions according to a uniform distribution.
-It could also be obtained using machine learning, as discussed in @post-shielding-optimization of #paperref(<paper:A>).
+
+#contribution[
+  The fallback policy can could also be obtained using machine learning. This approach is explored in @post-shielding-optimization of #paperref(<paper:A>).
+]
 
 Note that the fallback policy must be static during the training phase, (when applicable) in order to preserve convergence guarantees.
 Otherwise, $P^shield_(#h(1.5pt) fehu)$ will change during training, violating the assumption that the environment is static.

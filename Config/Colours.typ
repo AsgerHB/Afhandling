@@ -1,3 +1,9 @@
+// AAU blues https://www.aaukommunikation.aau.dk/design-og-skabeloner
+
+#let aaublå = cmyk(100%, 70%, 0%, 62%)
+#let aaulysblå = cmyk(82%, 63%, 0%, 0%)
+#let aaumørkgrå = cmyk(33%, 6%, 0%, 71%)
+
 // https://flatuicolors.com/palette/defo
 
 #let turquoise = cmyk(86%, 00%, 17%, 26%)

@@ -133,6 +133,14 @@
    }
 }
 
+#let contribution(body) = figure(
+  kind: "contribution",
+  supplement: [Contribution],
+  caption: [],
+  placement: none,
+  body
+)
+
 #let comment(content) = [ #h(1fr) $triangle.r$ #content ]
 
 #let Act = $A c t$
