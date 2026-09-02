@@ -866,8 +866,7 @@ This is illustrated in the following example.
 
 ] // end updated
 
-#todo[is#cl("DBLP:conf/tacas/Junges0DTK16") actually θ-safety? ]
-Synthesis methods for $theta$-safe shields #cl("DBLP:conf/tacas/Junges0DTK16")#cl("DBLP:journals/corr/DragerFK0U15") can also be computationally expensive, and will be more conservative than approaches focusing on recoverability #cl("DBLP:conf/concur/0001KJSB20")#cl("DBLP:journals/corr/abs-2605-10293")#cl("DBLP:conf/atva/PrangerKPB21")#cl("DBLP:conf/tacas/Junges0DTK16").
+Synthesis methods for $theta$-safe shields #cl("DBLP:conf/tacas/DragerFKPU14", "DBLP:conf/tacas/Junges0DTK16", "DBLP:conf/cav/HeckMACJ26") can also be computationally expensive, and will be more conservative than approaches focusing on recoverability #cl("DBLP:conf/concur/0001KJSB20")#cl("DBLP:journals/corr/abs-2605-10293")#cl("DBLP:conf/atva/PrangerKPB21")#cl("DBLP:conf/tacas/Junges0DTK16").
 
 === Permissiveness of Probabilistic Shields
 
