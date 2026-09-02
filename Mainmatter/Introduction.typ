@@ -321,7 +321,7 @@ This is ensured by the fact that $s_0$ is visited infinitely often as $n -> infi
       caption: [Value $max_a Q(s, a)$ and best action \ after 500 episodes.]
     )<fig:VTable>],
     [#figure(image("../Graphics/Intro/V-table Prism.png"),
-      caption: [Expected reward computed by Prism.]
+      caption: [Expected reward computed by #prism.]
     )<fig:VTablePrism>],
     label: <fig:gridQ>,
     caption: [Q-learning in the grid world.]
@@ -335,7 +335,7 @@ This is ensured by the fact that $s_0$ is visited infinitely often as $n -> infi
   This can be made more likely through changes to the reward function, giving a heavier penalty for reaching this state.
   However it is not straightforward to determine how the reward function should be defined in order to guarantee convergence to a safe policy, or whether this is even possible for a given model.
 
-  The same MDP can be modelled in the model-checking tool *Prism* @PRISM, and the optimal policy can be approximated precisely and quickly by its built-in value iteration method.
+  The same MDP can be modelled in the model-checking tool #prism @PRISM, and the optimal policy can be approximated precisely and quickly by its built-in value iteration method.
   #footnote[Discounted cost was implemented using a variable `t` that increments each step, multiplying the cost `C` with `gamma^t`. The query `Rmin=?[C<=100]` was used to compute cost. Cost was converted to reward by flipping the sign.]
   The resulting state values $V(s)$ are shown in @fig:VTablePrism.
 ]<ex:GridWorld>

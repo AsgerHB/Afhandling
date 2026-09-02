@@ -158,7 +158,15 @@
 #let modelsnot = $cancel(models, length: #90%)$
 #let widehat(body) = text(font: "Latin Modern Math", $hat(body)$)
 
-Numerals
+// Tools
+#let prism = smallcaps[Prism]
+#let uppaal = smallcaps[Uppaal]
+#let uppaalstratego = smallcaps[Uppaal Stratego]
+#let stratego = uppaalstratego
+#let uppaalcoshy = smallcaps[Uppaal Coshy]
+#let coshy = uppaalcoshy
+
+// Numerals
 #let th = "th"
 #let nd = "nd"
 
