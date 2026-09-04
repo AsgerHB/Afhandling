@@ -68,8 +68,9 @@
   // Contributions
   show figure.where(kind: "contribution"): it => block(
   fill: aaulysblå.lighten(96%),
-  stroke: (left: 4pt + aaublå),
-  inset: 12pt,
+  stroke: (left: 0.3em + aaublå),
+  inset: 0.5em,
+  outset: -0.15em,
   width: 100%,
   align(left)[
     #text(fill: aaublå)[*#it.supplement #it.counter.display(it.numbering)*]
@@ -143,8 +144,8 @@
   show thm-selector("thm-group", subgroup: "example"): it => block(
     it,
     breakable: true,
-    stroke: (0.5pt),
-    inset: 0.5em
+    stroke: (0.5pt + aaublå),
+    inset: 0.5em,
   )
   show thm-selector("thm-group", subgroup: "remark"): it => block(
     it,
