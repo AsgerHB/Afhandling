@@ -143,6 +143,8 @@
 
 #let comment(content) = [ #h(1fr) $triangle.r$ #content ]
 
+#let skew(content) = {set math.frac(style: "skewed"); content}
+
 #let Act = $A c t$
 #let mdp = $cal(M)$
 #let mg = $cal(G)$
@@ -161,6 +163,7 @@
 // Tools
 #let prism = smallcaps[Prism]
 #let uppaal = smallcaps[Uppaal]
+#let uppaalsmc = smallcaps[Uppaal SMC]
 #let uppaalstratego = smallcaps[Uppaal Stratego]
 #let stratego = uppaalstratego
 #let uppaalcoshy = smallcaps[Uppaal Coshy]
@@ -196,6 +199,20 @@
 #let dagaz = "ᛞ"
 #let othala = "ᛟ"
 
+// UPPAAL
+#let keyword(str) = {show raw: set text(fill: keywordColour); raw(str)}
+#let type(str) = {show raw: set text(fill: typeColour); raw(str)}
+
+#let location(str) = {show raw: set text(fill: locColour); raw(str)}
+#let invariant(str) = {show raw: set text(fill: invColour); raw(str)}
+#let rate(str) = {show raw: set text(fill: rateColour); raw(str)}
+#let select(str) = {show raw: set text(fill: selectColour); raw(str)}
+#let guard(str) = {show raw: set text(fill: guardColour); raw(str)}
+#let sync(str) = {show raw: set text(fill: syncColour); raw(str)}
+#let update(str) = {show raw: set text(fill: updateColour); raw(str)}
+#let weight(str) = {show raw: set text(fill: weightColour); raw(str)}
+#let transition(str) = {show raw: set text(fill: transColour); raw(str)}
+
 // "Double or Nothing" example
 #let flip = smallcaps(text("flip", font: "Gentium Book Plus"))
 #let stop = smallcaps(text("stop", font: "Gentium Book Plus"))
@@ -205,6 +222,11 @@
 #let lung = "🫁"
 #let lungexplode = lung + annotate(bottom + right, text("💥", size: 0.9em), dx: 0pt, dy: 0pt,)
 #let smoke = smallcaps(text("smoke", font: "Gentium Book Plus"))
+
+// BB example
+
+#let hit = "hit"
+#let nohit = "nohit"
 
 
 // Paper E

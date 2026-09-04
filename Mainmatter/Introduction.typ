@@ -678,7 +678,7 @@ Therefore, operation-only shielding should only be employed when re-training or 
   Lastly, any action in state 10 can cause the agent to slip onto state 11, so this state should be avoided as well. 
   
   @fig:GridWorldShield shows the resulting maximally permissive safe policy for @ex:GridWorld. 
-  This policy was generated using a publicly available package#footnote(link("https://github.com/AstridHornBrorholt/GridShielding.jl")) which implements the method described in #paperref(<paper:A>) (to be discussed in later sections).
+  This policy was generated using a publicly available package @GridShielding.jl which implements the method described in #paperref(<paper:A>) (to be discussed in later sections).
 
 #subpar.grid(columns: 3, align: bottom,
   [#figure(image("../Graphics/Intro/Shielded.png", width: 66.666%),
@@ -1180,6 +1180,8 @@ By relying on guarantees that are established during shield synthesis, some shie
 
 In a partially observable setting, sharing observations may also allow agents to achieve a more precise estimate of the underlying model state @10129007.
 
+#new[
+  
 == Hybrid MDPs
 
 So far, finite systems have been considered, building upon the finite MDP formalism given in @def:mdp. 
@@ -1189,125 +1191,135 @@ To simulate cyber-physical systems, one needs to capture both the discrete state
 
 Such hybrid systems contain both continuous dynamics, and discrete states that switch based on thresholds set for the continuous values.
 There are also purely physical phenomena that hybrid systems are suitable for modelling.
-A ball bouncing on the ground is one such example.
+A ball bouncing on the ground is one such example #cl("PaperA", "DBLP:conf/atva/JaegerJLLST19") which will be used in the following to illustrate the workings of a hybrid system.
+
+Hybrid systems can be specified in the modelling tool #uppaal through the extension #uppaalsmc #cl("DBLP:journals/sttt/DavidLLMP15").
+Models are specified as systems of components interacting through #sync("synchronization") and shared #invariant("variables") or #invariant("clocks").
+Components made up of #location("locations") which may have an #invariant("invariants"), and transitions between locations that contain #guard("guards"), #sync("synchronization channels") and #update("updates").
+
+Transitions are shown as arrows between locations, and are controlled either stochastically by the environment (dashed) or chosen by the player (solid). 
+A transition is possible when the component is currently in the transition's outgoing location, and the predicate in the guard, e.g. #guard("p >= 4 && v >= 0"), is satisfied.
+When a transition is taken, it moves the component from the outgoing to the incoming location, applying the specified update, e.g. #update("v = -4").
+
+Invariants control the evolution of clocks over time, e.g. #invariant("x <= 0.1"), whenever the component is in the location which contains the invariant.
+Time cannot progress if it would violate an active invariant, but taking a transition may enable the model to continue.
+If no transition can be taken a model deadlocks. 
+Oher than clock constraints, invariants may also specify generalized clock rates, e.g. #invariant("p' == v"), to specify how a clock evolves over time.
+
+Synchronization between components happen through #sync("channels").
+This may be initiated by transitions where the channel is suffixed by an exclamation point #sync("!"), i.e. #sync("hit!").
+When a channel is initiated by a transition, all receiving channels suffixed with a question mark #sync("?") will fire at the same time, if their guards are enabled.
+A channel may be urgent, which prevents time from progressing whenever the guard on an initiating transition is satisfied.
 
 #example(name: "Bouncing Ball")[
-  The ball it bounce.
+  A ball bounces on a flat surface, and can be struck by a piston whenever it is above a certain height #cl("PaperA", "PaperB", "PaperC", "JaegerJLLST19"), as shown in @fig:BBIllustration.
+  The energy preserved is stochastic both when the ball bounces on the ground, and when hit.
+  The ball experiences standard gravity $g = 9.81 skew("m"/"s"^2)$ and has a mass of $1$kg to simplify equations.
+  
+  #subpar.grid(columns: (0.4fr, 1fr), align: bottom,
+    [#figure(image("../Graphics/Intro/BB Illustration.svg"), caption: [Illustration of the system @JaegerJLLST19.])<fig:BBIllustration>],
+    [#figure(image("../Graphics/Intro/BB Ball.pdf"), caption: [#uppaal template from @PaperD. \ #hide("a")])<fig:BBBall>],
+    [#figure(image("../Graphics/Intro/BB Player.pdf"), caption: [#uppaal template from @PaperD. \ #hide("a")])<fig:BBPlayer>],
+    [#figure(image("../Graphics/Intro/BB Random Trace.svg", height: 100pt), caption: [Example trace produced by random agent with 5% chance of choosing $hit$ when $p > 4$.] )<fig:BBRandomTrace>],
+    caption: [Hitting bouncing ball.]
+  )
 
-  $ 
-  dot(v) = -g
-  #h(2em) 
-  dot(p) = v
-  $
+  The behaviour of the system is shown as a #uppaal model in @fig:BBBall.
+  The system has velocity $v$ (#skew($"m"/"s"$)) and position $p$ ($"m"$) measured as distance to the floor.
+  In the #location("InAir") location, these  variables have the rate  #invariant("p' == v && v' == -9.81") which govern the trajectory of the ball while it is in the air.
+  
+  The urgent channel #sync("bounce!") forces the system to take an uncontrollable (dashed) edge whenever the ball touches the ground #guard("p <= 0 && v <= 0").
+  For a sufficiently high speed, this causes the update $v ← -r v$ with $r ~ Unif([0.85; 0.97])$, where $Unif(X)$ represents the uniform distribution over some set $X$.
+  If the speed of the ball is near zero #guard("v > -1e-5") as it touches the ground, the component may instead move to the location named #location("Stop").
+  As its name implies, the velocity and position remain fixed at (near) zero in this location: #invariant("p' == 0 && v' == 0").
 
-  I feel like we are missing the time $t$ here...
-  Is it $v_t$ etc.? I think so.
-]
+  A player component shown in @fig:BBPlayer is given the option to initiate the #sync("hit!") channel once every 0.1 seconds.
+  A clock $x$ enforces a decision period of $0.1$, moving the player component into the location named #location("Choose").
+  This location has two outgoing transitions that lead back to the #location("Wait") location, one of which initiates the #sync("hit!") synchronization and increments #update("c") variable.
 
-It is not possible to apply Q-learning as described in @alg:QLearning directly.
+  Two transitions on @fig:BBBall may synchronize on the channel #sync("hit"), subject to the guards on these transitions.
+  These guards and transitions correspond to the following update rule with $r ~ Unif([0.9, 1])$:
+
+  $ v ← cases(
+    -4.0 &"if" p >= 4 and v < 0 and v >= -4, 
+    -4 - r v &"if" p >= 4 and v > 0,
+    v &"otherwise"
+  ) $ 
+
+  The behaviour of the system is shown in @fig:BBRandomTrace, which plots the position of the ball over time. 
+
+]<ex:BB>
+
+It is not possible to apply Q-learning as described in @alg:QLearning directly to continuous systems like @ex:BB.
 It is not practical to represent a Q-table over uncountably infinite states, and most states will almost-surely never be visited twice.
-So recording for a single state doesn't make much sense. 
-However, you can discretize the Q-table #citationneeded[].
+However, you can discretize the Q-table @kaelbling1996reinforcement by grouping similar states according to some partitioning scheme.
+A variant of discretized Q-learning with dynamic partitioning of the state-space is a feature of #uppaal @JaegerJLLST19, but for the next example a simple uniform partitioning scheme is used.
 
 #example(name: "Q-learning on BB")[
-  The Q-table was discretized with a bucket size of $0.2$ for $vec(v, p) in [-15; 15[ #h(2pt) times [0; 10[$.
-  That's $(15 - (-15))/0.2 times 10/0.2 = #{(15 - (-15))/0.2 * 10/0.2}$ cells.
-  Each cell is likewise lower-inclusive so the state so e.g. state $vec(-4, 1)$ is contained in the cell $ [-4; -3.8[ times [1; 1.2[$.
+  A Q-learning agent is set up to make a decision whenever the player is in the #location("Choose") location. 
+  Thus, only variables $vec(v, p)$ will be tracked, resulting in the state space $S = RR^2$. The initial state is set to $s_0 = vec(0, 7)$ and the action set is called $A = {hit, nohit}$. 
+  The reward $R$ is set up to give a penalty of $-1$ whenever the $hit$ action is chosen, and penalty $-50$ when the location #location("Stop") is entered.
 
-  In remaining states, $vec(v', p') in.not  [-15; 15[ #h(2pt) times [0; 10[$ the Q-values were set to not hit the ball: $Q(vec(v', p'), "nohit") = 0$ and $Q(vec(v', p'), "hit") = -infinity$.
+  The Q-table was discretized with an axis-aligned uniform partitioning within the set $S' = [-15; 15[ #h(2pt) times [0; 10[ subset RR^2$.
+  States in $S'$ are grouped into cells of size $0.1 times 0.1$ in the following manner: 
+  ${ \[overline(v); underline(v)\[ #h(2pt) times \[underline(p); overline(p)\[ #h(2pt)  subset S' | underline(v) - overline(v) = overline(p) - underline(p) = 0.1 }$.
 
-  It trained for $50000$ episodes of max-length $1000$ ($100$ seconds).
+  For example, the state $vec(-4, 1)$ is contained in the cell $ [-4; -3.9[#h(2pt) times [1; 1.1[$.
+  In total, the number of cells will be $|S'| = (15 - (-15))/0.1 times 10/0.1 = #{(15 - (-15))/0.1 * 10/0.1}$.
+
+  The Q-value of these states were initialized to zero: $Q(s', a) = 0$ for $s' in S'$ and $a in {hit, nohit}$.
+  In remaining states, $s in.not S'$, the ball will never be hit: $Q(s, nohit) = 0$ and $Q(s, hit) = -infinity$.
+
+  The results of raining are shown in @fig:BBUnshieldedTraining which plots  the reward obtained in each of  $50000$ episodes.
+  Each episode was limited to a length of $1000$ actions, which corresponds to $100$ seconds.
 
   #subpar.grid(columns: 3, align: top,
-    // figure(image("../Graphics/Intro/BB Shield.svg"),
-    //   caption: "Shield"
-    // ),
-    figure(image("../Graphics/Intro/BB Unshielded Training.png"),
-      caption: [Training graph]
-    ),
-    // figure(image("../Graphics/Intro/BB V-table.svg"),
-    //   caption: [V-table]
-    // ),
-    figure(image("../Graphics/Intro/BB Unshielded Policy.svg"),
-      caption: [Visualization of the policy]
-    ),
-    figure(image("../Graphics/Intro/BB Unshielded Trace.svg"),
-      caption: [Safety violation appearing in the $49755^th$ trace.]
-    ),
-    caption: [weh]
+    [#figure(image("../Graphics/Intro/BB Unshielded Training.png"), caption: [Training graph.])<fig:BBUnshieldedTraining>],
+    [#figure(image("../Graphics/Intro/BB Unshielded Policy.svg"), caption: [Visualization of the resulting policy.])<fig:BBUnshieldedPolicy>],
+    [#figure(image("../Graphics/Intro/BB Unshielded Trace.svg"), caption: [Safety violation \ during training.])<fig:BBUnshieldedTrace>],
+    caption: [Unshielded training of the bouncing ball described in @ex:BB.]
   )
 
   Unsafe traces were encountered during simulated operation. The average reward during simulated operation was $-30.8$.
+
+  A more advanced discretization scheme is available directly in the #uppaal tool, as part of the #uppaalstratego feature set #cl("DBLP:conf/atva/JaegerJLLST19").
+  This reinforcement learning technique will dynamically partition the state-space to group states with similar Q-values as it learns. 
+]<ex:BBUnshielded>
+
+=== Shielding Hybrid Systems
+
+The discretization method outlined in @ex:BBUnshielded may also be used to obtain a shield for hybrid systems, as shown in the following example.
+
+#contribution[
+  A shield can be obtained by a safety-relevant abstraction (cf. @ex:SafetyRelevantAbstraction) where the system is discretized into a finite number of cells.
+  A formal description of this method is introduced by #paperref(<paper:A>).
 ]
-
-Linear differential equations govern the position of bouncing ball while it's in the air.
-
-#definition(name: "Linear System")[
-  A linear system (LS) is a tuple $ls = (S, s_0, A, f, tau, R)$ where
-  - $S subset.eq RR^n$ is the convex $n$-dimensional state-space
-  - $s_0 in S$
-  - $A$ is the finite set of actions (really should be the continuous control variable)
-  - $f : S times A times RR -> RR^m$ gives the slope or something
-  - $tau in RR$ is the time step
-  - $R : S times A times S -> RR$ is the reward function
-
-  The system transitions is governed by the set of differential equations along the lines of 
-
-  $ (d s) / (d t) = f(s, a, t) $ <eq:derivative> // I don't think this is the derivative
-
-  For a policy it's defined like, you know, pretty much the same $pi : S -> A$ etc. a trace $xi = s_0 a_0 s_1 a_1 ...$ is an outcome of $ls$ and $pi$ if for $i in NN$ if $s = s_i$ at $t=0$ then $s_(i+1)$ is the solution to @eq:derivative for $t=tau$.
-
-  Trace segments and expected $gamma$-discounted reward can be extended directly.
-  ]
-
-This can express the dynamics of a bouncing ball falling in the air
-
-#example(name: [A linear system $cal(B)$ for BB])[
-  This might be excessive... And doesn't really amount to anything other than repeating what's in #paperref(<paper:A>).
-]
-
-Anyway. A hybrid system
-
-#definition(name: "Hybrid System")[
-  A hybrid system $cal(H) = (ls, tau, G, J)$ is erm...
-  With $ls = (S, s_0, A, f, tau, R)$...
-  - $G : S -> {top, bot}$ is some sort of guard
-  - $J : S -> S$ is the jump function
-
-  A trace is like a linear system except if at some point $G(s_t) = top$ we do $s'_t = J(s_t)$ and continue the diff eq with $s'_t$.
-]
-
-How to shield something like that is intricately hard. See @fig:BBReachability
-
-#figure(
-  image("../Graphics/Intro/BB Reachability.png", width: 33%),
-  caption: [BB Reachability]
-)<fig:BBReachability>
-
-But with this contribution of mine it is possible
 
 #example(name: [Shielding the Bouncing Ball])[
+  A shield is synthesized using the publicly available library @GridShielding.jl based on the formalism given in #paperref(<paper:A>).
+  The abstraction used the same subset of the state space $S' subset S$, but with a smaller cell size of $0.2 times 0.2$.
+  The package uses a sample-based method for approximating outcomes of actions from a given cell, and in this instance $3$ samples per axis were used.
+  The resulting shield is visualized in @fig:BBShield.
+
   #subpar.grid(columns: 3,
-    figure(image("../Graphics/Intro/BB Shield.svg"),
-      caption: [Visualization of the shield with cell size 0.02]
-    ),
-    figure(image("../Graphics/Intro/BB Shielded Training.png"),
-      caption: [Training graph when shield is applied.]
-    ),
-    figure(image("../Graphics/Intro/BB Shielded Policy.svg"),
-      caption: [End-to-end shielded policy.]
-    ),
+    [#figure(image("../Graphics/Intro/BB Shield.svg"), caption: [Visualization of the shield with cell size 0.02])<fig:BBShield>],
+    [#figure(image("../Graphics/Intro/BB Shielded Training.png"), caption: [Training graph when shield is applied.])<fig:BBShieldedTraining>],
+    [#figure(image("../Graphics/Intro/BB Shielded Policy.svg"), caption: [Shielded policy.])<fig:BBShieldedPolicy>],
     caption: [Shielding the Bouncing Ball],
   )<fig:ShieldingBB>
 
-  End-to-end pre-shielding achieved a mean reward of $31.04$.
+  Training-only pre-shielding was used for Q-learning with parameters otherwise identical to @ex:BBUnshielded.
+  Although the cell size of the Q-table does not match that of the shield, the safe-by-construction policy can be represented using the smallest cell-size.
+  This is possible because the shield's cell size of $0.02$, is a divisor of the coarser Q-table which has size $0.1$.
+
+  The training results under a pre-shield is shown in @fig:BBShieldedTraining. 
+  During evaluation, the resulting policy achieved a a mean reward of $-57$.
+  A visualization of his policy is shown in @fig:BBShieldedPolicy.
 
   Post-shielding 30.9 ??
 ]
 
-
-=== Shielding of Hybrid Systems
-...
+]  // end new
 
 == Tools for Shielding
 #citationneeded[uppaal] #citationneeded[tempest]

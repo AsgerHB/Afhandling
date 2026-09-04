@@ -84,6 +84,9 @@ function r(s, a)
 	is_terminal(s) ? cost - 50 : cost
 end
 
+# ╔═╡ 4e6a2f0c-4d2e-4a4b-9c3e-5c6b2c4a1f9d
+initial_state() = (0., 7.) # (0.0, Float64(rand(7:10)))
+
 # ╔═╡ 6e627214-d8fc-4782-a97c-a3f7b83c16a0
 md"""
 ### Try it out! Use the inputs below to test the function.
@@ -180,21 +183,30 @@ if recompute_shield_button > 0
 	rm(shield_cache_file)
 end
 
+# ╔═╡ e83d6ee6-d140-418d-9389-5197137b6e32
+function allow_all_when_unreachable!(shield::Grid)
+	for partition in shield
+		if get_value(partition) == no_action
+			set_value!(partition, any_action)
+		end
+	end
+	shield
+end
+
 # ╔═╡ 57cd2a0d-3462-4924-8198-af907c763074
 shield, max_steps_reached = let
+	recompute_shield_button
 	if isfile(shield_cache_file)
 		shield = robust_grid_deserialization(shield_cache_file)
 		max_steps_reached = false
 	else
 		# 🛡️ Actual synthesis 
 		shield, max_steps_reached = make_shield(reachability_function, Action, grid)
+		allow_all_when_unreachable!(shield)
 		robust_grid_serialization(shield_cache_file, shield)
 	end
 	shield, max_steps_reached
 end
-
-# ╔═╡ af27ca7b-2bcc-4f38-a4c3-5d2f0f933ccd
-
 
 # ╔═╡ ec0c414f-1c6a-4a2d-99cf-468fa617f36b
 shield.array
@@ -203,8 +215,8 @@ shield.array
 let
 	# instances(Action) = (hit, nohit), so bit0=hit, bit1=nohit
 	draw(shield, [:, :];
-		colors=["#2c3e50", "#9b59b6", "#f1c40f", :white],
-		color_labels=["none", "hit only", "nohit only", "both"],
+		colors=["#9b59b6", "#f1c40f", :white],
+		color_labels=["{ hit }", "{ nohit }", "{ hit, nohit }"],
 		xlabel="v",
 		ylabel="p",
 		size=(400, 400))
@@ -272,7 +284,7 @@ end
 🛡️((-4.0, 4.0))
 
 # ╔═╡ fa3c2622-d455-4ada-a2ca-d30ef4980f9f
-A = [nohit, hit]
+A = [hit, nohit]
 
 # ╔═╡ 6270c560-dd09-4441-ace5-bb38d67d5812
 🛡️((0.0, 0.0))
@@ -282,18 +294,17 @@ A = [nohit, hit]
 
 # ╔═╡ 2fb06675-6283-49db-aaaa-df14b5315e14
 # The shield's grid doesn't cover every state simulate_point can reach
-	# (e.g. after an unlucky hit sends the ball far outside p_hit's range).
-	# Default to nohit for any state outside the grid instead of erroring.
-	function Q_value(Q, s, a)
-		s ∈ grid || return a == nohit ? 0.0 : -∞
-		get_value(box(Q[a], s))
-	end
-
-	# The action set to choose/argmax over at state s: filtered down to
-	# shielded actions when use_shield is true, explicitly, rather than
-	# relying on -∞ Q-values to rule out unsafe actions.
+# (e.g. after an unlucky hit sends the ball far outside p_hit's range).
+# Default to nohit for any state outside the grid instead of erroring.
+function Q_value(Q, s, a)
+	s ∈ grid || return a == nohit ? 0.0 : -∞
+	get_value(box(Q[a], s))
+end
 
 # ╔═╡ 371467e8-4fe1-448d-927a-987a94965896
+# The action set to choose/argmax over at state s: filtered down to
+# shielded actions when use_shield is true, explicitly, rather than
+# relying on -∞ Q-values to rule out unsafe actions.
 function actions_at(s, use_shield)
 		use_shield ? 🛡️(s) : A
 end
@@ -317,7 +328,7 @@ The size of this discretization affects learning. Higher resolution may yield a 
 """
 
 # ╔═╡ 241c61b9-0b28-4653-b36c-ac9c2e6fcb9c
-@bind granularity_of_Q_table Select([0.02, 0.05, 0.1, 0.2, 0.5, 1, 2], default=1)
+@bind granularity_of_Q_table Select([0.02, 0.05, 0.1, 0.2, 0.5, 1, 2], default=0.1)
 
 # ╔═╡ 218cbaf2-175e-477e-815e-706d95cbfec2
 # Q is one Grid{Float64} per action
@@ -325,10 +336,10 @@ The size of this discretization affects learning. Higher resolution may yield a 
 begin
 	function init_value(a)
 		# Bias the initial Q-values towards nohit
-		# a == nohit ? 0.0 : -0.1
+		a == nohit ? 0.0 : -eps()
 		
 		# Just zero everywhere
-		0
+		# 0
 
 		# Slightly random
 		# rand(Uniform(-0.1, 0.1))
@@ -358,15 +369,37 @@ end
 # Episode max length. 1 second is 10 time-steps.
 @bind T Select([100, 1000, 10000], default=1000)
 
+# ╔═╡ 13a65e27-f740-4c89-8374-f85365250aa3
+# Simulate an episode with probability p of choosing "hit"
+function episode(π)
+	Sₜ = initial_state()
+	Aₜ = nohit
+	∑r =0
+	ξ = []
+	for t ∈ 1:T
+		Sₜ₊₁ = f(Sₜ, Aₜ)
+		rₜ₊₁ = r(Sₜ₊₁, Aₜ)
+		∑r += rₜ₊₁
+
+		Aₜ₊₁ = π(Sₜ₊₁)
+
+		push!(ξ, (Sₜ, Aₜ, rₜ₊₁))
+
+		if is_terminal(Sₜ₊₁)
+			push!(ξ, (Sₜ₊₁, nohit, 0)) # Dummy action & reward: Just want last state
+			return ∑r, ξ
+		end
+
+		Sₜ, Aₜ = Sₜ₊₁, Aₜ₊₁
+	end
+	return ∑r, ξ
+end
+
 # ╔═╡ 5eda40c9-f10c-4a12-a458-e76d844e7419
 @bind γ NumberField(0.0001:0.0001:1, default=0.99)
 
 # ╔═╡ 135a5791-f61d-48a9-9e31-fabfb72c0e69
 [ϵ_greedy(0.2, Q_init, (0.0, 8.0)) for _ in 1:10]
-
-# ╔═╡ 4e6a2f0c-4d2e-4a4b-9c3e-5c6b2c4a1f9d
-# Starting velocity 0, position sampled as in evaluate/evaluate_safety
-initial_state() = (0.0, Float64(rand(7:10)))
 
 # ╔═╡ 466621e0-9448-46d6-bff5-de76ff0e25e5
 md"""
@@ -409,14 +442,14 @@ end
 
 # ╔═╡ 167769f4-024b-44ce-b3bf-a94b3d2a5006
 function Q_episode!(Q, i)
-	Σr =  0
+	∑r =  0
 	Sₜ = initial_state()
 	Aₜ = ϵ_greedy(ϵ(i), Q, Sₜ)
 	ξ = []
 	for t ∈ 1:T
 		Sₜ₊₁ = f(Sₜ, Aₜ)
 		rₜ₊₁ = r(Sₜ₊₁, Aₜ)
-		Σr += rₜ₊₁
+		∑r += rₜ₊₁
 
 		# Only update Q for states actually on the grid — Sₜ can be out of
 		# bounds if the previous step landed outside it (Aₜ then forced nohit).
@@ -433,14 +466,13 @@ function Q_episode!(Q, i)
 		push!(ξ, (Sₜ, Aₜ, rₜ₊₁))
 
 		if is_terminal(Sₜ₊₁)
-			# Include terminal state in trace (arbitrary action, no reward.)
-			push!(ξ, (Sₜ₊₁, A[1], 0.0))
-			return Σr, ξ
+			push!(ξ, (Sₜ₊₁, nohit, 0)) # Dummy action & reward: Just want last state
+			return ∑r, ξ
 		end
 
 		Sₜ, Aₜ = Sₜ₊₁, Aₜ₊₁
 	end
-	return Σr, ξ
+	return ∑r, ξ
 end
 
 # ╔═╡ c6c020d2-3f0e-4764-9d86-d6d8a202113a
@@ -550,7 +582,7 @@ let
 		xlim=(-15, 15),
 		ylim=(0,10),
 		ylabel="p",
-		clim=(-50, 0),
+		#clim=(-50, 0),
 		size=(400, 400))
 end
 
@@ -618,8 +650,7 @@ md"""
 @bind trace_to_visualize NumberField(1:length(traces), default=episodes)
 
 # ╔═╡ d2b5f6c3-4a7e-4d0f-9c3b-2e6f8a1b0d45
-let
-	ξ = traces[trace_to_visualize]
+function show_trace(ξ)
 	states = [s for (s, a, _) in ξ]
 	actions = [a for (s, a, _) in ξ]
 	times = collect(0:length(states)-1) .* bbmechanics.t_hit
@@ -637,6 +668,18 @@ let
 	scatter!(hits, markersize=3, markercolor=:white, label="Hit attempt")
 	hline!([4], label=nothing, color=:gray)
 end
+
+# ╔═╡ 3048f348-a530-428b-9ecf-373cc324bcc5
+let
+	∑r, ξ = episode(s -> let
+		v, p = s
+		p > 4 && rand() < 0.1 ? hit : nohit
+	end)
+	show_trace(ξ)
+end
+
+# ╔═╡ d70e088f-d899-4605-a897-287b73d0d4ed
+show_trace(traces[trace_to_visualize])
 
 # ╔═╡ 5b2a7ebd-8dc0-42f7-b7b0-441092bd14c3
 md"""
@@ -683,32 +726,12 @@ elseif !shielded_learning && !shielded_operation
 	"""
 end
 
-# ╔═╡ 13a65e27-f740-4c89-8374-f85365250aa3
-# Simulate an episode with ϵ=0, an optional shield, and no updates to the Q-table.
-function episode(Q)
-	ϵ = 0.0
-	Σr =  0
-	Sₜ = initial_state()
-	Aₜ = Sₜ ∈ grid ? argmax((a) -> Q_value(Q, Sₜ, a), actions_at(Sₜ, shielded_operation)) : nohit
-	ξ = []
-	for t ∈ 1:T
-		Sₜ₊₁ = f(Sₜ, Aₜ)
-		rₜ₊₁ = r(Sₜ₊₁, Aₜ)
-		Σr += rₜ₊₁
-
-		Aₜ₊₁ = Sₜ₊₁ ∈ grid ? argmax((a) -> Q_value(Q, Sₜ₊₁, a), actions_at(Sₜ₊₁, shielded_operation)) : nohit
-
-		push!(ξ, (Sₜ, Aₜ, rₜ₊₁))
-
-		if is_terminal(Sₜ₊₁)
-			push!(ξ, (Sₜ₊₁, A[1], 0))
-			return Σr, ξ
-		end
-
-		Sₜ, Aₜ = Sₜ₊₁, Aₜ₊₁
-	end
-	return Σr, ξ
-end
+# ╔═╡ 5b70c647-8fda-40c6-ba8f-882fb51017e3
+# TODO: Export the trained strategy so it becomes safe by construction, 
+#       in order to allow training-only shielding.
+π_Q(s) = s ∈ grid ? 
+	argmax((a) -> Q_value(Q, s, a), actions_at(s, shielded_operation)) : 
+	nohit
 
 # ╔═╡ 060b5725-40b9-4575-b41b-c68cb1c75ebe
 function operation(Q, episodes)
@@ -716,7 +739,7 @@ function operation(Q, episodes)
 	traces = []
 	
 	@progress for i ∈ 1:episodes
-		R, ξ = episode(Q)
+		R, ξ = episode(π_Q)
 		push!(rewards, R)
 		push!(traces, ξ)
 	end
@@ -752,11 +775,16 @@ operation_rewards
 
 # ╔═╡ b6760fd5-f8a6-40a0-a60d-1b7b83169452
 md"""
-**Mean reward:**
+**Mean reward 👇**
 """
 
 # ╔═╡ 7de24775-9639-4484-bdda-d6674fb16cb7
 sum(operation_rewards)/operation_episodes
+
+# ╔═╡ 8bad80f9-8fe0-4bc6-bbc2-5c5aec78ffed
+md"""
+**Mean Reward👆**
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2198,6 +2226,9 @@ version = "1.13.0+0"
 # ╠═7c634330-d307-4f32-9649-a79c849c12af
 # ╠═a832de86-2f9f-43b8-b379-f17a6109b50b
 # ╠═5468e72e-bf32-4ca8-a9b7-579aaef265e0
+# ╠═4e6a2f0c-4d2e-4a4b-9c3e-5c6b2c4a1f9d
+# ╠═13a65e27-f740-4c89-8374-f85365250aa3
+# ╠═3048f348-a530-428b-9ecf-373cc324bcc5
 # ╟─6e627214-d8fc-4782-a97c-a3f7b83c16a0
 # ╠═b6e0dc22-9c30-4a1a-8f42-df7c99bf0efc
 # ╠═54fbe43e-eb61-4630-82e7-9c4c0c5c8b86
@@ -2220,7 +2251,7 @@ version = "1.13.0+0"
 # ╠═89b9e551-cc21-47c2-9432-0029245b3e54
 # ╠═1e619b36-1caa-4139-ad81-9231ab039ce6
 # ╠═57cd2a0d-3462-4924-8198-af907c763074
-# ╠═af27ca7b-2bcc-4f38-a4c3-5d2f0f933ccd
+# ╠═e83d6ee6-d140-418d-9389-5197137b6e32
 # ╠═ec0c414f-1c6a-4a2d-99cf-468fa617f36b
 # ╠═403a5a86-1fb8-498b-bd83-a418f9165fa3
 # ╟─b7c00112-ebe4-454e-a35a-7ba4e19ba9ea
@@ -2242,8 +2273,8 @@ version = "1.13.0+0"
 # ╠═371467e8-4fe1-448d-927a-987a94965896
 # ╠═2117a08d-06a0-4828-bd72-be8987224a30
 # ╟─15ab274d-c648-48cb-a79b-408326f8aae3
-# ╠═241c61b9-0b28-4653-b36c-ac9c2e6fcb9c
 # ╠═218cbaf2-175e-477e-815e-706d95cbfec2
+# ╠═241c61b9-0b28-4653-b36c-ac9c2e6fcb9c
 # ╠═fbce7689-eb9d-4120-8d3d-6a01e66cb4fe
 # ╠═073098a8-0ee4-4817-ae8b-0a6a8ba3804f
 # ╠═4883874d-c0e8-4984-be4d-a4c082367f74
@@ -2253,7 +2284,6 @@ version = "1.13.0+0"
 # ╠═2641f88e-d3a6-4cc1-b9a9-dd651c850a16
 # ╠═1170955f-c3fe-47fd-8e01-af6bccd7a6a5
 # ╠═c6c020d2-3f0e-4764-9d86-d6d8a202113a
-# ╠═4e6a2f0c-4d2e-4a4b-9c3e-5c6b2c4a1f9d
 # ╠═167769f4-024b-44ce-b3bf-a94b3d2a5006
 # ╟─466621e0-9448-46d6-bff5-de76ff0e25e5
 # ╠═d2f6ea71-2b10-4816-bade-d66565cdd73a
@@ -2280,12 +2310,13 @@ version = "1.13.0+0"
 # ╟─b6d3f7a1-2e4c-4b8d-9a1e-7c5f6a8e2d10
 # ╠═c1a4e5b2-3f6d-4c9e-8b2a-1d5e7f9a0c34
 # ╟─d2b5f6c3-4a7e-4d0f-9c3b-2e6f8a1b0d45
+# ╠═d70e088f-d899-4605-a897-287b73d0d4ed
 # ╟─5b2a7ebd-8dc0-42f7-b7b0-441092bd14c3
 # ╠═428a7486-e5e8-4a63-9f4a-f7d58bd9d511
 # ╟─cf3c3947-71d1-442c-8ffd-75b1acb1cc1c
 # ╠═e36f0fbd-807b-4531-abff-36851bf96ff6
 # ╟─03f5d81c-e4d6-4ce5-b8a6-45185cfcbac9
-# ╠═13a65e27-f740-4c89-8374-f85365250aa3
+# ╠═5b70c647-8fda-40c6-ba8f-882fb51017e3
 # ╠═060b5725-40b9-4575-b41b-c68cb1c75ebe
 # ╠═deb9fe30-06b4-4497-b28a-6d943db8df6a
 # ╟─7b090d43-824c-4fb1-8e62-cc05660915ca
@@ -2294,5 +2325,6 @@ version = "1.13.0+0"
 # ╠═815481ac-221b-4167-912f-1f2b4441fc25
 # ╟─b6760fd5-f8a6-40a0-a60d-1b7b83169452
 # ╠═7de24775-9639-4484-bdda-d6674fb16cb7
+# ╟─8bad80f9-8fe0-4bc6-bbc2-5c5aec78ffed
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

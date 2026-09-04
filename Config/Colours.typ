@@ -29,3 +29,19 @@
 #let pomegranate = cmyk(00%, 70%, 78%, 25%)
 #let silver = cmyk(05%, 02%, 00%, 22%)
 #let asbestos = cmyk(10%, 01%, 00%, 45%)
+
+// Taken from https://github.com/UPPAALModelChecker/uppaal-latex/blob/main/uppaal.sty
+
+#let commentColour = cmyk(rgb(40%, 0%, 0%) )// dark red
+#let keywordColour = cmyk(rgb(0%, 40%, 0%) )// dark green
+#let typeColour = cmyk(rgb(0%, 30%, 0%) )// darker green
+
+#let locColour = cmyk(rgb(50%, 0%, 0%) )// dark red
+#let invColour = cmyk(rgb(40%, 0%, 40%)) // dark magenta
+#let rateColour = cmyk(rgb(87.5%, 25%, 50%)) // pink
+#let selectColour = cmyk(rgb(40%, 40%, 0%)) // dark yellow, brown
+#let guardColour = cmyk(rgb(0%, 30%, 0%) )// dark green
+#let syncColour = cmyk(rgb(0%, 40%, 40%)) // cyan
+#let updateColour = cmyk(rgb(0%, 0%, 40%) )// dark blue
+#let weightColour = cmyk(rgb(40%, 20%, 0%)) // dark orange, red brown
+#let transColour = cmyk(rgb(40%, 0%, 40%)) // dark magenta
