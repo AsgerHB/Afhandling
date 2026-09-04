@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>/**
+ * Changes:
+ * - Had to change the initial positions so the player acts immediately.
+ * - Had to make p and veloccity global, because the syntax does not support expressions as variables.
+ */
+
+
+broadcast chan hit;
+clock time;
+clock p = 10.0;
+clock v = 10.0;
+int c = 0;</declaration>
+	<template>
+		<name x="5" y="5">Ball</name>
+		<declaration>urgent broadcast chan bounce;</declaration>
+		<location id="id0" x="152" y="144">
+			<name x="135" y="195">Stop</name>
+			<label kind="invariant" x="135" y="212">p' == 0 &amp;&amp;
+v' == 0</label>
+		</location>
+		<location id="id1" x="348" y="144">
+			<name x="323" y="195">InAir</name>
+			<label kind="invariant" x="323" y="212">p' == v &amp;&amp;
+v' == -9.81</label>
+		</location>
+		<init ref="id1"/>
+		<transition id="id2" controllable="false">
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="guard" x="416" y="144">p&gt;=4 &amp;&amp; v &lt; 0 &amp;&amp; v &gt;= -4</label>
+			<label kind="synchronisation" x="416" y="161">hit?</label>
+			<label kind="assignment" x="416" y="178">v = -4.0</label>
+			<nail x="408" y="144"/>
+			<nail x="408" y="195"/>
+		</transition>
+		<transition id="id3" controllable="false">
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="guard" x="416" y="59">p&gt;=4 &amp;&amp; v&gt;=0</label>
+			<label kind="synchronisation" x="416" y="76">hit?</label>
+			<label kind="assignment" x="416" y="93">v = -4 - (0.9+random(0.1))*v</label>
+			<nail x="408" y="68"/>
+			<nail x="408" y="119"/>
+		</transition>
+		<transition id="id4" controllable="false">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="guard" x="178" y="85">p &lt;= 0 &amp;&amp;
+v &lt;= 0 &amp;&amp;
+v &gt; -1e-5</label>
+			<label kind="synchronisation" x="178" y="144">bounce!</label>
+		</transition>
+		<transition id="id5" controllable="false">
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="guard" x="263" y="1">p &lt;= 0 &amp;&amp; v &lt;= 0</label>
+			<label kind="synchronisation" x="263" y="17">bounce!</label>
+			<label kind="assignment" x="263" y="34">v = -(0.85+random(0.12)) * v</label>
+			<nail x="272" y="60"/>
+			<nail x="323" y="60"/>
+		</transition>
+	</template>
+	<template>
+		<name>Player</name>
+		<declaration>clock x;</declaration>
+		<location id="id6" x="-340" y="-34">
+			<name x="-391" y="-42">Wait</name>
+			<label kind="invariant" x="-408" y="-25">x&lt;=0.1</label>
+		</location>
+		<location id="id7" x="-238" y="-34">
+			<name x="-221" y="-42">Choose</name>
+			<committed/>
+		</location>
+		<init ref="id7"/>
+		<transition id="id8">
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<nail x="-238" y="0"/>
+			<nail x="-340" y="0"/>
+		</transition>
+		<transition id="id9">
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-340" y="-102">hit!</label>
+			<label kind="assignment" x="-340" y="-85">c++</label>
+			<nail x="-238" y="-68"/>
+			<nail x="-340" y="-68"/>
+		</transition>
+		<transition id="id10" controllable="false">
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-314" y="-51">x==0.1</label>
+			<label kind="assignment" x="-314" y="-34">x=0</label>
+		</transition>
+	</template>
+	<system>player = Player();
+
+//system ballBH, player, ballB ;
+system Ball, Player;</system>
+	<queries>
+		<option key="--total-runs" value="300"/>
+		<option key="--alpha" value="0.01"/>
+		<option key="--beta" value="0.01"/>
+		<option key="--good-runs" value="100"/>
+		<option key="--epsilon" value="0.01"/>
+		<option key="--out-of-bounds" value="1"/>
+		<query>
+			<formula>strategy efficient = minE(c + Ball.Stop*50) [&lt;=100] {} -&gt; {v, p} : &lt;&gt; time&gt;=100 || Ball.Stop</formula>
+			<comment/>
+			<option key="--total-runs" value="5000"/>
+			<option key="--alpha" value="0.01"/>
+			<option key="--beta" value="0.01"/>
+			<option key="--good-runs" value="5000"/>
+			<option key="--runs-pr-state" value="5000"/>
+			<option key="--epsilon" value="0.01"/>
+			<option key="--out-of-bounds" value="1"/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=30]{ p, v } under efficient</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;100] (max: c + Ball.Stop*50) under efficient</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>Pr[&lt;=120;10000] (&lt;&gt; Ball.Stop) under efficient</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>strategy safe = acontrol: A[] (!Ball.Stop) { v[-13, 13]:1300, p[0, 11]:550, Ball.location }</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>saveStrategy("/tmp/uppaal_tests/peters_ball.json", safe)</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>strategy reduced_safe = loadStrategy("/tmp/uppaal_tests/peters_ball.json")</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=120]{ p, v } under reduced_safe</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>strategy safe_and_efficient = minE(c) [&lt;=120] {} -&gt; {v, p} : &lt;&gt; time&gt;=120  under safe</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=120]{ p, v } under safe_and_efficient</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>Pr[&lt;=120;10000] (&lt;&gt; Ball.Stop) under safe_and_efficient</formula>
+			<comment/>
+		</query>
+	</queries>
+</nta>
