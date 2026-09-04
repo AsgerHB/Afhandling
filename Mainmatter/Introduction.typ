@@ -1092,7 +1092,7 @@ Analogously to joint and individual policies, a shield is called either _global_
   A safe nondeterministic individual policy is called a local shield $shield_i : S -> A_i$.
 ]<def:GlobalAndLocalShields>
 
-The concepts of maximally permissive shields and shielded global/local policies extend naturally from @def:Shielding.
+The concepts in @def:Shielding of maximally permissive shields, and permitted actions and policies (global and local) extend naturally from @def:GlobalAndLocalShields.
 
 A safe set may be feasible (cf. @def:Feasibility) with a global shield, but not feasible for any of the players as a local shield.
 This is shown in @ex:2PlayerGridWorld.
@@ -1194,6 +1194,7 @@ There are also purely physical phenomena that hybrid systems are suitable for mo
 A ball bouncing on the ground is one such example #cl("PaperA", "DBLP:conf/atva/JaegerJLLST19") which will be used in the following to illustrate the workings of a hybrid system.
 
 Hybrid systems can be specified in the modelling tool #uppaal through the extension #uppaalsmc #cl("DBLP:journals/sttt/DavidLLMP15").
+An informal description of key features will be given here.
 Models are specified as systems of components interacting through #sync("synchronization") and shared #invariant("variables") or #invariant("clocks").
 Components made up of #location("locations") which may have an #invariant("invariants"), and transitions between locations that contain #guard("guards"), #sync("synchronization channels") and #update("updates").
 
@@ -1283,7 +1284,9 @@ A variant of discretized Q-learning with dynamic partitioning of the state-space
   Unsafe traces were encountered during simulated operation. The average reward during simulated operation was $-30.8$.
 
   A more advanced discretization scheme is available directly in the #uppaal tool, as part of the #uppaalstratego feature set #cl("DBLP:conf/atva/JaegerJLLST19").
-  This reinforcement learning technique will dynamically partition the state-space to group states with similar Q-values as it learns. 
+  This reinforcement learning technique will dynamically partition the state-space to group states with similar Q-values as it learns.
+  A policy was trained using the query `minE(c + Ball.Stop*50) [<=100] {} -> {v, p} : <> time>=100` which achieved an average reward of ?? during simulated operation.
+  #todo[Run the numbers]
 ]<ex:BBUnshielded>
 
 === Shielding Hybrid Systems
@@ -1291,7 +1294,7 @@ A variant of discretized Q-learning with dynamic partitioning of the state-space
 The discretization method outlined in @ex:BBUnshielded may also be used to obtain a shield for hybrid systems, as shown in the following example.
 
 #contribution[
-  A shield can be obtained by a safety-relevant abstraction (cf. @ex:SafetyRelevantAbstraction) where the system is discretized into a finite number of cells.
+  A shield can be obtained from a safety-relevant abstraction (cf. @ex:SafetyRelevantAbstraction) where the system is discretized into a finite number of cells.
   A formal description of this method is introduced by #paperref(<paper:A>).
 ]
 
@@ -1313,15 +1316,17 @@ The discretization method outlined in @ex:BBUnshielded may also be used to obtai
   This is possible because the shield's cell size of $0.02$, is a divisor of the coarser Q-table which has size $0.1$.
 
   The training results under a pre-shield is shown in @fig:BBShieldedTraining. 
-  During evaluation, the resulting policy achieved a a mean reward of $-57$.
-  A visualization of his policy is shown in @fig:BBShieldedPolicy.
+  During evaluation, the resulting policy achieved a a mean reward of $-32.7$.
+  A visualization of this policy is shown in @fig:BBShieldedPolicy.
 
-  Post-shielding 30.9 ??
+  Applying the pre-shield to the strategy from @ex:BBUnshielded for operation-only shielding yielded a reward of ??.
+  #todo[Run the numbers]
 ]
 
 ]  // end new
 
 == Tools for Shielding
+
 #citationneeded[uppaal] #citationneeded[tempest]
 
 == Research Statement and Goals
