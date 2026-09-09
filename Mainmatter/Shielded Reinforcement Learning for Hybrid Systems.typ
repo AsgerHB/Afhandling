@@ -599,7 +599,8 @@ first-order predicate over the reals (note that
 $F lr((lr((p comma v)) comma t))$ is a pair of polynomials in
 $p comma v$ and $t$):#footnote[We assume that at most one bounce can
 take place within the period $P$.]
-$ exists lr((p comma v)) in mu dot.basic med F lr((lr((p comma v)) comma P)) in mu prime or  & exists beta in lr([0.85 comma 0.97]) dot.basic med exists t prime lt.eq P dot.basic med exists v prime dot.basic\
+
+$ exists lr((p comma v)) in mu dot.basic med &F lr((lr((p comma v)) comma P)) in mu prime or  exists beta in lr([0.85 comma 0.97]) dot.basic med exists t prime lt.eq P dot.basic med exists v prime dot.basic\
  & F lr((lr((p comma v)) comma t prime)) eq lr((0 comma v prime)) and F lr((lr((0 comma minus beta dot.op v prime)) comma P minus t prime)) in mu prime $
 
 #figure(kind: "algorithm", supplement: [Algorithm], placement: bottom,

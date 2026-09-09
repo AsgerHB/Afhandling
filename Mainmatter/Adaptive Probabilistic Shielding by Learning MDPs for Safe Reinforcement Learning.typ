@@ -521,10 +521,16 @@ denote the relative occurrence of transition
 $lr((s comma a comma s prime_j))$ in the database $D$. Then, the updates
 are:
 
-$ underline(T)_i arrow.l {frac(overline(n)_i underline(T)_i plus D lr((s comma a comma s prime_i)), overline(n)_i plus D lr((s comma a))) quad upright("if ") F_j gt.eq underline(T)_j upright(" for all ") s_j prime comma\
-frac(underline(n)_i underline(T)_i plus D lr((s comma a comma s prime_i)), underline(n)_i plus D lr((s comma a))) quad upright("otherwise") dot.basic $
-$ overline(T)_i arrow.l {frac(overline(n)_i overline(T)_i plus D lr((s comma a comma s prime_i)), overline(n)_i plus D lr((s comma a))) quad upright("if ") F_j lt.eq overline(T)_j upright(" for all ") s_j prime comma\
-frac(underline(n)_i overline(T)_i plus D lr((s comma a comma s prime_i)), underline(n)_i plus D lr((s comma a))) quad upright("otherwise") dot.basic $<eq:lui>
+#[
+  #set math.cases(gap: 0.7em)
+$ underline(T)_i arrow.l cases(
+  frac(overline(n)_i underline(T)_i plus D lr((s comma a comma s prime_i)), overline(n)_i plus D lr((s comma a))) quad upright("if ") F_j gt.eq underline(T)_j upright(" for all ") s_j prime comma,
+frac(underline(n)_i underline(T)_i plus D lr((s comma a comma s prime_i)), underline(n)_i plus D lr((s comma a))) quad upright("otherwise") dot.basic) $
+$ overline(T)_i arrow.l cases(
+  frac(overline(n)_i overline(T)_i plus D lr((s comma a comma s prime_i)), overline(n)_i plus D lr((s comma a))) quad upright("if ") F_j lt.eq overline(T)_j upright(" for all ") s_j prime comma,
+frac(underline(n)_i overline(T)_i plus D lr((s comma a comma s prime_i)), underline(n)_i plus D lr((s comma a))) quad upright("otherwise") dot.basic) $<eq:lui>
+
+]
 
 The (strength) intervals are found from total counts
 $lr([underline(n)_i plus D lr((s comma a)) comma overline(n)_i plus D lr((s comma a))])$.
