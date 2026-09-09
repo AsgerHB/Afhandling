@@ -1166,7 +1166,7 @@ In general, the optimal policy for a partially observable game requires memory o
 If the trace $zeta_1^n = o_1 a_1 o_2 a_2, ... o_n$ is an alternating sequence of observations and actions, a policy with memory would choose the next action as $pi(zeta_1^n) = a_n$, while a memoryless policy would as only rely on the last observation $pi(o_n) = a_n$.
 The difference in performance between the optimal memoryless policy and the optimal policy with memory depends on the game $mg$.
 
-Similarly, a shield in a partially observable system can use memory to maintain a "belief set" of states that are possible given current and previous observations #cl("DBLP:conf/aaai/Carr0JT23").
+Similarly, a shield in a partially observable system can use memory to maintain a "belief set" of states that are possible given current and previous observations~#cl("DBLP:conf/aaai/Carr0JT23").
 A memoryless shield is instead limited to allowing only actions that are safe for any state that can yield the current observation.
 
 
@@ -1203,14 +1203,14 @@ A transition is possible when the component is currently in the transition's out
 When a transition is taken, it moves the component from the outgoing to the incoming location, applying the specified update, e.g. #update("v = -4").
 
 Invariants control the evolution of clocks over time, e.g. #invariant("x <= 0.1"), whenever the component is in the location which contains the invariant.
-Time cannot progress if it would violate an active invariant, but taking a transition may enable the model to continue.
-If no transition can be taken a model deadlocks. 
-Oher than clock constraints, invariants may also specify generalized clock rates, e.g. #invariant("p' == v"), to specify how a clock evolves over time.
+Time cannot progress if it would violate an active invariant, but taking a transition may allow the system to progress.
+If no transition can be taken, a model deadlocks.
+In addition to constraints, invariants may also specify generalized clock rates, e.g. #invariant("p' == v"), which allows modelling linear dynamics.
 
 Synchronization between components happen through #sync("channels").
 This may be initiated by transitions where the channel is suffixed by an exclamation point #sync("!"), i.e. #sync("hit!").
 When a channel is initiated by a transition, all receiving channels suffixed with a question mark #sync("?") will fire at the same time, if their guards are enabled.
-A channel may be urgent, which prevents time from progressing whenever the guard on an initiating transition is satisfied.
+A~channel may be urgent, which prevents time from progressing whenever the guard on an initiating transition is satisfied.
 
 #example(name: "Bouncing Ball")[
   A ball bounces on a flat surface, and can be struck by a piston whenever it is above a certain height #cl("PaperA", "PaperB", "PaperC", "JaegerJLLST19"), as shown in @fig:BBIllustration.
@@ -1219,13 +1219,13 @@ A channel may be urgent, which prevents time from progressing whenever the guard
   
   #subpar.grid(columns: (0.4fr, 1fr), align: bottom,
     [#figure(image("../Graphics/Intro/BB Illustration.svg"), caption: [Illustration of the system @JaegerJLLST19.])<fig:BBIllustration>],
-    [#figure(image("../Graphics/Intro/BB Ball.pdf"), caption: [#uppaal template from @PaperD. \ #hide("a")])<fig:BBBall>],
-    [#figure(image("../Graphics/Intro/BB Player.pdf"), caption: [#uppaal template from @PaperD. \ #hide("a")])<fig:BBPlayer>],
+    [#figure(image("../Graphics/Intro/BB Ball.pdf"), caption: [#uppaal "Ball" template from @PaperD. \ #hide("a")])<fig:BBBall>],
+    [#figure(image("../Graphics/Intro/BB Player.pdf"), caption: [#uppaal "Player" template from @PaperD. \ #hide("a")])<fig:BBPlayer>],
     [#figure(image("../Graphics/Intro/BB Random Trace.svg", height: 100pt), caption: [Example trace produced by random agent with 5% chance of choosing $hit$ when $p > 4$.] )<fig:BBRandomTrace>],
     caption: [Hitting bouncing ball.]
   )
 
-  The behaviour of the system is shown as a #uppaal model in @fig:BBBall.
+  The behaviour of the system is shown as an #uppaal model in @fig:BBBall.
   The system has velocity $v$ (#skew($"m"/"s"$)) and position $p$ ($"m"$) measured as distance to the floor.
   In the #location("InAir") location, these  variables have the rate  #invariant("p' == v && v' == -9.81") which govern the trajectory of the ball while it is in the air.
   
@@ -1295,7 +1295,7 @@ The discretization method outlined in @ex:BBUnshielded may also be used to obtai
 
 #contribution[
   A shield can be obtained from a safety-relevant abstraction (cf. @ex:SafetyRelevantAbstraction) where the system is discretized into a finite number of cells.
-  A formal description of this method is introduced by #paperref(<paper:A>).
+  A~formal description of this method is introduced in #paperref(<paper:A>).
 ]
 
 #example(name: [Shielding the Bouncing Ball])[
