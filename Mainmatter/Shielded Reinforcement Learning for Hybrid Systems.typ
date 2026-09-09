@@ -268,9 +268,14 @@ recursive equation:
 
 $ 
 bb(E)_sigma^(cal(M)) (s) eq 
-cases(delim: "{", 
-  0 & upright("if ") s in cal(G), 
-  sum_(a in italic("Act")) sigma (s) (a) dot.op integral_(s prime in cal(S)) T (s comma a) (s prime) dot.op ( C lr((s comma a comma s prime)) plus bb(E)_sigma^(cal(M)) lr((s prime)) ) thin d s prime & upright("if ") s in.not cal(G)
+cases(
+  0 & && upright("if ") s in cal(G) #v(02em), 
+  
+  sum_(a in italic("Act")) sigma (s) (a)
+  dot.op integral_(s prime in cal(S)) &T (s comma a) (s prime) dot.op,  // Best I can do for line-breaks in cases is commas. 
+  &( C lr((s comma a comma s prime)) plus
+  bb(E)_sigma^(cal(M)) lr((s prime)) ) thin d s prime
+  "  " && upright("if ") s in.not cal(G)
 )
 $
 
